@@ -251,11 +251,11 @@ export function ThankYouSection({
                 <div className="relative inline-block">
                   <div className="h-[104px] w-[104px] sm:h-[116px] sm:w-[116px] overflow-hidden rounded-full border border-[#2a2319]/10 bg-[#ebe4d6]">
                     <ResilientImage
-                      src={PROFILE.portraitUrl}
+                      src="/assets/aistudio/Zoom_photo_2166b094.jpeg"
                       alt={`${PROFILE.name}, ${PROFILE.role}`}
                       fallbackTitle={PROFILE.name}
                       className="h-full w-full"
-                      imgClassName="object-cover object-top"
+                      imgClassName="object-cover object-[50%_38%] scale-[1.18]"
                     />
                   </div>
                   {/* Organic hand-drawn double-loop periwinkle circle */}

@@ -593,6 +593,12 @@ export default function App() {
         updateActiveSection();
       });
       resizeObserver.observe(mainRef.current);
+      const headerEl = document.querySelector<HTMLElement>(
+        '[data-sticky-header="true"], header'
+      );
+      if (headerEl) {
+        resizeObserver.observe(headerEl);
+      }
     }
 
     return () => {
