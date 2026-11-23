@@ -3,6 +3,7 @@ import { Award, ChevronDown, ChevronUp } from 'lucide-react';
 import { TIMELINE_MILESTONES } from '../data/portfolioData';
 import { ContainerScroll } from './ui/container-scroll-animation';
 import { EditorialSheet } from './ui/editorial-sheet';
+import { EditorialStaggerGroup, EditorialStaggerItem } from './ui/editorial-stagger';
 import { PenAnnotation, ZigZagToSwooshUnderline } from './ui/pen-annotations';
 
 type TimelineTrackFilter = 'all' | 'product' | 'sales';
@@ -36,34 +37,40 @@ export function CareerTimelineSection() {
           variant="section"
           surface="night"
           titleComponent={
-            <div className="space-y-3">
-              <div className="flex flex-wrap items-center justify-center gap-3">
-                <p className="font-display text-xs font-semibold tracking-[0.04em] pen-ink-text">
-                  Career Progression &amp; Honors
-                </p>
-                <PenAnnotation
-                  text="Top 1% cohort · 142% avg quota"
-                  arrow="right-loop"
-                  tilt="rotate-1"
-                  className="hidden sm:inline-flex"
+            <EditorialStaggerGroup staggerDelay={0.075} className="space-y-3">
+              <EditorialStaggerItem yOffset={12}>
+                <div className="flex flex-wrap items-center justify-center gap-3">
+                  <p className="font-display text-xs font-semibold tracking-[0.04em] pen-ink-text">
+                    Career Progression &amp; Honors
+                  </p>
+                  <PenAnnotation
+                    text="Top 1% cohort · 142% avg quota"
+                    arrow="right-loop"
+                    tilt="rotate-1"
+                    className="hidden sm:inline-flex"
+                  />
+                </div>
+              </EditorialStaggerItem>
+              <EditorialStaggerItem yOffset={16}>
+                <h2
+                  className="font-display text-[1.9rem] leading-[2.35rem] font-extrabold tracking-[-0.025em] text-slate-950 dark:text-[#f1f5f9] md:text-[2.75rem] md:leading-[3.2rem]"
+                  style={{ textWrap: 'balance' }}
+                >
+                  Enterprise Sales Rigor Meets Product Craft
+                </h2>
+                <ZigZagToSwooshUnderline
+                  align="center"
+                  widthClassName="w-48 sm:w-60"
+                  className="pt-0.5"
                 />
-              </div>
-              <h2
-                className="font-display text-[1.9rem] leading-[2.35rem] font-extrabold tracking-[-0.025em] text-slate-950 dark:text-[#f1f5f9] md:text-[2.75rem] md:leading-[3.2rem]"
-                style={{ textWrap: 'balance' }}
-              >
-                Enterprise Sales Rigor Meets Product Craft
-              </h2>
-              <ZigZagToSwooshUnderline
-                align="center"
-                widthClassName="w-48 sm:w-60"
-                className="pt-0.5"
-              />
-              <p className="mx-auto max-w-2xl text-base leading-[1.6] text-slate-600 dark:text-[#94a3b8]">
-                Dual-track milestone rail highlighting enterprise execution across
-                BrowserStack &amp; Razorpay alongside product fellowship honors at NextLeap.
-              </p>
-            </div>
+              </EditorialStaggerItem>
+              <EditorialStaggerItem yOffset={14}>
+                <p className="mx-auto max-w-2xl text-base leading-[1.7] text-slate-600 dark:text-[#94a3b8]">
+                  Dual-track milestone rail highlighting enterprise execution across
+                  BrowserStack &amp; Razorpay alongside product fellowship honors at NextLeap.
+                </p>
+              </EditorialStaggerItem>
+            </EditorialStaggerGroup>
           }
         >
           <div className="p-5 sm:p-7 md:p-9 lg:p-10">
@@ -131,13 +138,13 @@ export function CareerTimelineSection() {
               className="absolute bottom-4 left-[7px] top-4 w-[2px] bg-slate-200 dark:bg-white/[0.1] md:left-[15px]"
             />
 
-            <div className="space-y-6">
+            <EditorialStaggerGroup staggerDelay={0.085} className="space-y-6">
               {visibleMilestones.map((milestone) => {
                 const isGold = milestone.track === 'product';
                 const isExpanded = !!expandedIds[milestone.id];
 
                 return (
-                  <div key={milestone.id} className="relative">
+                  <EditorialStaggerItem key={milestone.id} yOffset={18} className="relative">
                     {/* 16px outer ring milestone node with central active pip */}
                     <div
                       aria-hidden="true"
@@ -262,10 +269,10 @@ export function CareerTimelineSection() {
                         </div>
                       )}
                     </article>
-                  </div>
+                  </EditorialStaggerItem>
                 );
               })}
-            </div>
+            </EditorialStaggerGroup>
           </div>
         </div>
       </ContainerScroll>

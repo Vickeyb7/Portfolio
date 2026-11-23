@@ -3,6 +3,7 @@ import { ArrowUpRight, Award } from 'lucide-react';
 import { CASE_STUDIES, CaseStudy } from '../data/portfolioData';
 import { ContainerScroll } from './ui/container-scroll-animation';
 import { EditorialSheet } from './ui/editorial-sheet';
+import { EditorialStaggerGroup, EditorialStaggerItem } from './ui/editorial-stagger';
 import { PenAnnotation, ZigZagToSwooshUnderline } from './ui/pen-annotations';
 import { ResilientImage } from './ResilientImage';
 
@@ -26,33 +27,37 @@ export function ProductShowcaseScroll({
         <ContainerScroll
           surface="night"
           titleComponent={
-            <div className="space-y-3">
-              <div className="flex flex-wrap items-center justify-center gap-3">
-                <p className="font-display text-xs font-semibold tracking-[0.04em] pen-ink-text">
-                  Interactive Product Spotlight
-                </p>
-                <PenAnnotation
-                  text="switch tabs for live PRD specs"
-                  arrow="down-right"
-                  tilt="rotate-2"
-                  className="hidden sm:inline-flex"
+            <EditorialStaggerGroup staggerDelay={0.08} className="space-y-3">
+              <EditorialStaggerItem yOffset={14}>
+                <div className="flex flex-wrap items-center justify-center gap-3">
+                  <p className="font-display text-xs font-semibold tracking-[0.04em] pen-ink-text">
+                    Interactive Product Spotlight
+                  </p>
+                  <PenAnnotation
+                    text="switch tabs for live PRD specs"
+                    arrow="down-right"
+                    tilt="rotate-2"
+                    className="hidden sm:inline-flex"
+                  />
+                </div>
+              </EditorialStaggerItem>
+              <EditorialStaggerItem yOffset={18}>
+                <h2
+                  className="font-display text-3xl sm:text-4xl md:text-[3.25rem] md:leading-[3.75rem] font-extrabold tracking-[-0.025em] text-slate-950 dark:text-[#f1f5f9]"
+                  style={{ textWrap: 'balance' }}
+                >
+                  From Enterprise Discovery to
+                  <span className="block mt-1 text-[#1d63ff] dark:text-[#b5c4ff]">
+                    Shipped Product Architecture
+                  </span>
+                </h2>
+                <ZigZagToSwooshUnderline
+                  align="center"
+                  widthClassName="w-52 sm:w-64"
+                  className="pt-1"
                 />
-              </div>
-              <h2
-                className="font-display text-3xl sm:text-4xl md:text-[3.25rem] md:leading-[3.75rem] font-extrabold tracking-[-0.025em] text-slate-950 dark:text-[#f1f5f9]"
-                style={{ textWrap: 'balance' }}
-              >
-                From Enterprise Discovery to
-                <span className="block mt-1 text-[#1d63ff] dark:text-[#b5c4ff]">
-                  Shipped Product Architecture
-                </span>
-              </h2>
-              <ZigZagToSwooshUnderline
-                align="center"
-                widthClassName="w-52 sm:w-64"
-                className="pt-1"
-              />
-            </div>
+              </EditorialStaggerItem>
+            </EditorialStaggerGroup>
           }
         >
           <div className="flex h-full flex-col bg-white dark:bg-[#0b0e15]">

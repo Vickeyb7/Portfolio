@@ -5,6 +5,7 @@ import { ArrowUp, ArrowUpRight, Check, Copy } from 'lucide-react';
 import { PROFILE } from '../data/portfolioData';
 import { ResilientImage } from './ResilientImage';
 import { EditorialSheet } from './ui/editorial-sheet';
+import { EditorialStaggerGroup, EditorialStaggerItem } from './ui/editorial-stagger';
 import { ZigZagToSwooshUnderline } from './ui/pen-annotations';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -240,177 +241,189 @@ export function ThankYouSection({
         <div className="mx-auto max-w-[1160px] px-5 pt-10 pb-14 sm:px-8 md:pt-14 md:pb-20 lg:px-12">
           <div className="grid grid-cols-1 gap-12 lg:grid-cols-12 lg:gap-0">
             {/* Left Column: Circled Avatar, Serif Closing Title, Copyable Email, Hover-Underlined Links */}
-            <div className="lg:col-span-5 lg:pr-12">
+            <EditorialStaggerGroup
+              staggerDelay={0.085}
+              delayChildren={0.04}
+              className="lg:col-span-5 lg:pr-12"
+            >
               {/* Hand-circled Avatar */}
-              <div className="relative inline-block">
-                <div className="h-[104px] w-[104px] sm:h-[116px] sm:w-[116px] overflow-hidden rounded-full border border-[#2a2319]/10 bg-[#ebe4d6]">
-                  <ResilientImage
-                    src={PROFILE.portraitUrl}
-                    alt={`${PROFILE.name}, ${PROFILE.role}`}
-                    fallbackTitle={PROFILE.name}
-                    className="h-full w-full"
-                    imgClassName="object-cover object-top"
-                  />
+              <EditorialStaggerItem yOffset={14}>
+                <div className="relative inline-block">
+                  <div className="h-[104px] w-[104px] sm:h-[116px] sm:w-[116px] overflow-hidden rounded-full border border-[#2a2319]/10 bg-[#ebe4d6]">
+                    <ResilientImage
+                      src={PROFILE.portraitUrl}
+                      alt={`${PROFILE.name}, ${PROFILE.role}`}
+                      fallbackTitle={PROFILE.name}
+                      className="h-full w-full"
+                      imgClassName="object-cover object-top"
+                    />
+                  </div>
+                  {/* Organic hand-drawn double-loop periwinkle circle */}
+                  <svg
+                    ref={avatarRingRef}
+                    viewBox="0 0 140 140"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    aria-hidden="true"
+                    className="pointer-events-none absolute -inset-3 h-[calc(100%+24px)] w-[calc(100%+24px)] overflow-visible text-[#4f6df5]"
+                  >
+                    <path
+                      d="M 74 11 C 109 12, 132 39, 130 74 C 128 109, 100 132, 66 130 C 31 128, 8 102, 11 67 C 14 32, 42 10, 77 12"
+                      stroke="currentColor"
+                      strokeWidth="2.4"
+                      strokeLinecap="round"
+                    />
+                    <path
+                      d="M 62 15 C 97 10, 127 33, 127 68 C 127 103, 98 128, 63 127 C 30 126, 13 98, 15 65 C 17 34, 41 16, 69 13"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      opacity="0.72"
+                    />
+                  </svg>
                 </div>
-                {/* Organic hand-drawn double-loop periwinkle circle */}
-                <svg
-                  ref={avatarRingRef}
-                  viewBox="0 0 140 140"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                  aria-hidden="true"
-                  className="pointer-events-none absolute -inset-3 h-[calc(100%+24px)] w-[calc(100%+24px)] overflow-visible text-[#4f6df5]"
-                >
-                  <path
-                    d="M 74 11 C 109 12, 132 39, 130 74 C 128 109, 100 132, 66 130 C 31 128, 8 102, 11 67 C 14 32, 42 10, 77 12"
-                    stroke="currentColor"
-                    strokeWidth="2.4"
-                    strokeLinecap="round"
-                  />
-                  <path
-                    d="M 62 15 C 97 10, 127 33, 127 68 C 127 103, 98 128, 63 127 C 30 126, 13 98, 15 65 C 17 34, 41 16, 69 13"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    opacity="0.72"
-                  />
-                </svg>
-              </div>
+              </EditorialStaggerItem>
 
               {/* Bold Editorial Serif Title */}
-              <h2
-                className="mt-8 font-serif text-[2.75rem] leading-[1.03] font-bold tracking-[-0.025em] text-[#141413] sm:text-[3.35rem]"
-                style={{ textWrap: 'balance' }}
-              >
-                Thank you
-                <br />
-                for reading.
-              </h2>
+              <EditorialStaggerItem yOffset={16}>
+                <h2
+                  className="mt-8 font-serif text-[2.75rem] leading-[1.03] font-bold tracking-[-0.025em] text-[#141413] sm:text-[3.35rem]"
+                  style={{ textWrap: 'balance' }}
+                >
+                  Thank you
+                  <br />
+                  for reading.
+                </h2>
 
-              <ZigZagToSwooshUnderline
-                align="left"
-                widthClassName="w-40 sm:w-48"
-                className="mt-3"
-              />
+                <ZigZagToSwooshUnderline
+                  align="left"
+                  widthClassName="w-40 sm:w-48"
+                  className="mt-3"
+                />
+              </EditorialStaggerItem>
 
               {/* One-Click Copyable Email */}
-              <div className="mt-10">
-                <p className="text-xs font-medium text-[#70685c]">Get in touch</p>
-                {prefilledTopic && (
-                  <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-[#4f6df5]">
-                    <span>
-                      Discussing:{' '}
-                      <strong className="font-semibold">{prefilledTopic}</strong>
-                    </span>
-                    <a
-                      href={`mailto:${PROFILE.email}?subject=${encodeURIComponent(
-                        `Case Study Walkthrough: ${prefilledTopic}`
-                      )}`}
-                      className="underline underline-offset-2 hover:text-[#1d4ed8]"
-                    >
-                      Open in mail
-                    </a>
-                    {onClearPrefilledTopic && (
-                      <button
-                        type="button"
-                        onClick={onClearPrefilledTopic}
-                        className="text-[#787064] hover:text-[#141413] cursor-pointer"
+              <EditorialStaggerItem yOffset={14}>
+                <div className="mt-10">
+                  <p className="text-xs font-medium text-[#70685c]">Get in touch</p>
+                  {prefilledTopic && (
+                    <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-[#4f6df5]">
+                      <span>
+                        Discussing:{' '}
+                        <strong className="font-semibold">{prefilledTopic}</strong>
+                      </span>
+                      <a
+                        href={`mailto:${PROFILE.email}?subject=${encodeURIComponent(
+                          `Case Study Walkthrough: ${prefilledTopic}`
+                        )}`}
+                        className="underline underline-offset-2 hover:text-[#1d4ed8]"
                       >
-                        · Dismiss
-                      </button>
-                    )}
-                  </div>
-                )}
-                <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-2">
-                  <button
-                    type="button"
-                    onClick={handleCopyEmail}
-                    title="Click to copy email address"
-                    className="group relative inline-flex items-center font-serif text-[1.55rem] sm:text-[1.8rem] font-bold tracking-[-0.015em] text-[#141413] hover:text-[#4f6df5] transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4f6df5] rounded"
-                  >
-                    <span>{PROFILE.email}</span>
-                    <span
-                      aria-hidden="true"
-                      className="absolute inset-x-0 -bottom-0.5 h-[2px] origin-left scale-x-0 bg-[#4f6df5] transition-transform duration-200 group-hover:scale-x-100"
-                    />
-                  </button>
+                        Open in mail
+                      </a>
+                      {onClearPrefilledTopic && (
+                        <button
+                          type="button"
+                          onClick={onClearPrefilledTopic}
+                          className="text-[#787064] hover:text-[#141413] cursor-pointer"
+                        >
+                          · Dismiss
+                        </button>
+                      )}
+                    </div>
+                  )}
+                  <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-2">
+                    <button
+                      type="button"
+                      onClick={handleCopyEmail}
+                      title="Click to copy email address"
+                      className="group relative inline-flex items-center font-serif text-[1.55rem] sm:text-[1.8rem] font-bold tracking-[-0.015em] text-[#141413] hover:text-[#4f6df5] transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4f6df5] rounded"
+                    >
+                      <span>{PROFILE.email}</span>
+                      <span
+                        aria-hidden="true"
+                        className="absolute inset-x-0 -bottom-0.5 h-[2px] origin-left scale-x-0 bg-[#4f6df5] transition-transform duration-200 group-hover:scale-x-100"
+                      />
+                    </button>
 
-                  <button
-                    type="button"
-                    onClick={handleCopyEmail}
-                    aria-label={copied ? 'Email copied to clipboard' : 'Copy email address'}
-                    className="inline-flex min-h-[36px] items-center gap-1.5 rounded-md px-2 py-1 text-xs font-semibold text-[#4f6df5] hover:bg-[#4f6df5]/[0.08] transition-colors whitespace-nowrap shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4f6df5]"
-                  >
-                    {copied ? (
-                      <>
-                        <Check className="h-3.5 w-3.5" aria-hidden="true" />
-                        <span>Copied</span>
-                      </>
-                    ) : (
-                      <>
-                        <Copy className="h-3.5 w-3.5" aria-hidden="true" />
-                        <span>Copy</span>
-                      </>
-                    )}
-                  </button>
+                    <button
+                      type="button"
+                      onClick={handleCopyEmail}
+                      aria-label={copied ? 'Email copied to clipboard' : 'Copy email address'}
+                      className="inline-flex min-h-[36px] items-center gap-1.5 rounded-md px-2 py-1 text-xs font-semibold text-[#4f6df5] hover:bg-[#4f6df5]/[0.08] transition-colors whitespace-nowrap shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4f6df5]"
+                    >
+                      {copied ? (
+                        <>
+                          <Check className="h-3.5 w-3.5" aria-hidden="true" />
+                          <span>Copied</span>
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="h-3.5 w-3.5" aria-hidden="true" />
+                          <span>Copy</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                  <span className="sr-only" aria-live="polite">
+                    {copied ? `${PROFILE.email} copied to clipboard.` : ''}
+                  </span>
                 </div>
-                <span className="sr-only" aria-live="polite">
-                  {copied ? `${PROFILE.email} copied to clipboard.` : ''}
-                </span>
-              </div>
+              </EditorialStaggerItem>
 
               {/* Hover-Underlined Editorial Links */}
-              <nav
-                aria-label="Closing links"
-                className="mt-8 border-t border-[#2a2319]/12 pt-5"
-              >
-                <ul className="space-y-3.5">
-                  {links.map((link) => {
-                    const innerContent = (
-                      <>
-                        <span className="relative inline-flex items-center gap-1.5 font-display text-sm font-semibold text-[#18191f] group-hover:text-[#4f6df5] transition-colors">
-                          <span>{link.label}</span>
-                          <ArrowUpRight
-                            className="h-3.5 w-3.5 text-[#4f6df5] transition-transform duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
-                            aria-hidden="true"
-                          />
-                          <span
-                            aria-hidden="true"
-                            className="absolute inset-x-0 -bottom-0.5 h-[1.5px] origin-left scale-x-0 bg-[#4f6df5] transition-transform duration-200 group-hover:scale-x-100"
-                          />
-                        </span>
-                        <span className="font-mono text-[11px] text-[#787064] group-hover:text-[#464037] transition-colors truncate max-w-[180px] sm:max-w-none">
-                          {link.meta}
-                        </span>
-                      </>
-                    );
+              <EditorialStaggerItem yOffset={14}>
+                <nav
+                  aria-label="Closing links"
+                  className="mt-8 border-t border-[#2a2319]/12 pt-5"
+                >
+                  <ul className="space-y-3.5">
+                    {links.map((link) => {
+                      const innerContent = (
+                        <>
+                          <span className="relative inline-flex items-center gap-1.5 font-display text-sm font-semibold text-[#18191f] group-hover:text-[#4f6df5] transition-colors">
+                            <span>{link.label}</span>
+                            <ArrowUpRight
+                              className="h-3.5 w-3.5 text-[#4f6df5] transition-transform duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
+                              aria-hidden="true"
+                            />
+                            <span
+                              aria-hidden="true"
+                              className="absolute inset-x-0 -bottom-0.5 h-[1.5px] origin-left scale-x-0 bg-[#4f6df5] transition-transform duration-200 group-hover:scale-x-100"
+                            />
+                          </span>
+                          <span className="font-mono text-[11px] text-[#787064] group-hover:text-[#464037] transition-colors truncate max-w-[180px] sm:max-w-none">
+                            {link.meta}
+                          </span>
+                        </>
+                      );
 
-                    return (
-                      <li key={link.label}>
-                        {link.href ? (
-                          <a
-                            href={link.href}
-                            target={link.external ? '_blank' : undefined}
-                            rel={link.external ? 'noreferrer' : undefined}
-                            className="group flex min-h-[36px] items-center justify-between gap-4 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4f6df5] rounded"
-                          >
-                            {innerContent}
-                          </a>
-                        ) : (
-                          <button
-                            type="button"
-                            onClick={link.onClick}
-                            className="group flex min-h-[36px] w-full items-center justify-between gap-4 py-1 text-left cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4f6df5] rounded"
-                          >
-                            {innerContent}
-                          </button>
-                        )}
-                      </li>
-                    );
-                  })}
-                </ul>
-              </nav>
-            </div>
+                      return (
+                        <li key={link.label}>
+                          {link.href ? (
+                            <a
+                              href={link.href}
+                              target={link.external ? '_blank' : undefined}
+                              rel={link.external ? 'noreferrer' : undefined}
+                              className="group flex min-h-[36px] items-center justify-between gap-4 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4f6df5] rounded"
+                            >
+                              {innerContent}
+                            </a>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={link.onClick}
+                              className="group flex min-h-[36px] w-full items-center justify-between gap-4 py-1 text-left cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4f6df5] rounded"
+                            >
+                              {innerContent}
+                            </button>
+                          )}
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </nav>
+              </EditorialStaggerItem>
+            </EditorialStaggerGroup>
 
             {/* Right Column: Paragraph-by-Paragraph Handwritten Closing Letter & Signature */}
             <div className="flex flex-col justify-between lg:col-span-7 lg:border-l lg:border-[#2a2319]/12 lg:pl-12">
@@ -419,7 +432,7 @@ export function ThankYouSection({
                   <p
                     key={idx}
                     data-letter-para
-                    className="font-hand text-[1.35rem] sm:text-[1.54rem] leading-[1.46] font-medium tracking-[0.005em] text-[#171923]"
+                    className="font-hand text-[1.35rem] sm:text-[1.54rem] leading-[1.54] font-medium tracking-[0.014em] text-[#171923]"
                   >
                     {paragraph}
                   </p>

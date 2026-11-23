@@ -4,6 +4,7 @@ import { CASE_STUDIES, CaseCategory, CaseStudy } from '../data/portfolioData';
 import { ResilientImage } from './ResilientImage';
 import { ContainerScroll } from './ui/container-scroll-animation';
 import { EditorialSheet } from './ui/editorial-sheet';
+import { EditorialStaggerGroup, EditorialStaggerItem } from './ui/editorial-stagger';
 import { PenAnnotation, ZigZagToSwooshUnderline } from './ui/pen-annotations';
 
 interface CaseStudiesSectionProps {
@@ -54,34 +55,40 @@ export function CaseStudiesSection({ onSelectCaseStudy }: CaseStudiesSectionProp
           variant="section"
           surface="paper"
           titleComponent={
-            <div className="space-y-3">
-              <div className="flex flex-wrap items-center justify-center gap-3">
-                <p className="font-display text-xs font-semibold tracking-[0.04em] pen-ink-text">
-                  Selected Product Artifacts
-                </p>
-                <PenAnnotation
-                  text="click any brief for full PRD + RICE"
-                  arrow="down-left"
-                  tilt="-rotate-2"
-                  className="hidden sm:inline-flex"
+            <EditorialStaggerGroup staggerDelay={0.075} className="space-y-3">
+              <EditorialStaggerItem yOffset={12}>
+                <div className="flex flex-wrap items-center justify-center gap-3">
+                  <p className="font-display text-xs font-semibold tracking-[0.04em] pen-ink-text">
+                    Selected Product Artifacts
+                  </p>
+                  <PenAnnotation
+                    text="click any brief for full PRD + RICE"
+                    arrow="down-left"
+                    tilt="-rotate-2"
+                    className="hidden sm:inline-flex"
+                  />
+                </div>
+              </EditorialStaggerItem>
+              <EditorialStaggerItem yOffset={16}>
+                <h2
+                  className="font-display text-[1.9rem] leading-[2.35rem] font-extrabold tracking-[-0.025em] text-slate-950 dark:text-[#f1f5f9] md:text-[2.75rem] md:leading-[3.2rem]"
+                  style={{ textWrap: 'balance' }}
+                >
+                  Product Case Studies &amp; Shipped Specs
+                </h2>
+                <ZigZagToSwooshUnderline
+                  align="center"
+                  widthClassName="w-48 sm:w-60"
+                  className="pt-0.5"
                 />
-              </div>
-              <h2
-                className="font-display text-[1.9rem] leading-[2.35rem] font-extrabold tracking-[-0.025em] text-slate-950 dark:text-[#f1f5f9] md:text-[2.75rem] md:leading-[3.2rem]"
-                style={{ textWrap: 'balance' }}
-              >
-                Product Case Studies &amp; Shipped Specs
-              </h2>
-              <ZigZagToSwooshUnderline
-                align="center"
-                widthClassName="w-48 sm:w-60"
-                className="pt-0.5"
-              />
-              <p className="mx-auto max-w-2xl text-base leading-[1.6] text-slate-600 dark:text-[#94a3b8]">
-                Each brief opens an interactive artifact drawer with full PRD framing, RICE
-                prioritization tables, and user journey diagnostics.
-              </p>
-            </div>
+              </EditorialStaggerItem>
+              <EditorialStaggerItem yOffset={14}>
+                <p className="mx-auto max-w-2xl text-base leading-[1.7] text-slate-600 dark:text-[#94a3b8]">
+                  Each brief opens an interactive artifact drawer with full PRD framing, RICE
+                  prioritization tables, and user journey diagnostics.
+                </p>
+              </EditorialStaggerItem>
+            </EditorialStaggerGroup>
           }
         >
           <div className="p-5 sm:p-7 md:p-9 lg:p-10">
@@ -167,14 +174,21 @@ export function CaseStudiesSection({ onSelectCaseStudy }: CaseStudiesSectionProp
               </button>
             </div>
           ) : (
-            <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <EditorialStaggerGroup
+              staggerDelay={0.09}
+              className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-2"
+            >
               {filteredStudies.map((study, index) => {
                 const isWideFeatured =
                   activeFilter === 'all' && !searchQuery && index === 0;
 
                 return (
-                  <article
+                  <EditorialStaggerItem
                     key={study.id}
+                    yOffset={20}
+                    className={isWideFeatured ? 'lg:col-span-2' : 'h-full'}
+                  >
+                  <article
                     data-cursor="inspect"
                     onClick={() => onSelectCaseStudy(study)}
                     onKeyDown={(e) => {
@@ -186,8 +200,8 @@ export function CaseStudiesSection({ onSelectCaseStudy }: CaseStudiesSectionProp
                     tabIndex={0}
                     role="button"
                     aria-label={`Open deep-dive PRD and metrics for ${study.title}`}
-                    className={`surface-card surface-card-interactive group relative flex flex-col justify-between overflow-hidden rounded-2xl text-left cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1d63ff] ${
-                      isWideFeatured ? 'lg:col-span-2 lg:grid lg:grid-cols-12' : ''
+                    className={`surface-card surface-card-interactive group relative flex h-full flex-col justify-between overflow-hidden rounded-2xl text-left cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1d63ff] ${
+                      isWideFeatured ? 'lg:grid lg:grid-cols-12' : ''
                     } ${
                       study.distinction ? 'glow-champagne-corner' : 'glow-cobalt-corner'
                     }`}
@@ -294,9 +308,10 @@ export function CaseStudiesSection({ onSelectCaseStudy }: CaseStudiesSectionProp
                       </div>
                     </div>
                   </article>
+                  </EditorialStaggerItem>
                 );
               })}
-            </div>
+            </EditorialStaggerGroup>
           )}
         </div>
       </ContainerScroll>

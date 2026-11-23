@@ -10,6 +10,7 @@ import {
 } from '../data/portfolioData';
 import { ContainerScroll } from './ui/container-scroll-animation';
 import { EditorialSheet } from './ui/editorial-sheet';
+import { EditorialStaggerGroup, EditorialStaggerItem } from './ui/editorial-stagger';
 import { PenAnnotation, ZigZagToSwooshUnderline } from './ui/pen-annotations';
 import { TechLogoMark } from './TechLogoMark';
 
@@ -56,38 +57,53 @@ export function CapabilitiesAndProofSection({
           variant="section"
           surface="paper"
           titleComponent={
-            <div className="space-y-3">
-              <div className="flex flex-wrap items-center justify-center gap-3">
-                <p className="font-display text-xs font-semibold tracking-[0.04em] pen-ink-text">
-                  Operating Stack &amp; Craft
-                </p>
-                <PenAnnotation
-                  text="shipped & tested in production"
-                  arrow="left-loop"
-                  tilt="-rotate-2"
-                  className="hidden sm:inline-flex"
+            <EditorialStaggerGroup
+              className="space-y-3"
+              staggerDelay={0.08}
+              delayChildren={0.04}
+            >
+              <EditorialStaggerItem yOffset={12}>
+                <div className="flex flex-wrap items-center justify-center gap-3">
+                  <p className="font-display text-xs font-semibold tracking-[0.04em] pen-ink-text">
+                    Operating Stack &amp; Craft
+                  </p>
+                  <PenAnnotation
+                    text="shipped & tested in production"
+                    arrow="left-loop"
+                    tilt="-rotate-2"
+                    className="hidden sm:inline-flex"
+                  />
+                </div>
+              </EditorialStaggerItem>
+              <EditorialStaggerItem yOffset={16}>
+                <h2
+                  className="font-display text-[1.9rem] leading-[2.35rem] font-extrabold tracking-[-0.025em] text-slate-950 dark:text-[#f1f5f9] md:text-[2.75rem] md:leading-[3.2rem]"
+                  style={{ textWrap: 'balance' }}
+                >
+                  Bridging Customer Discovery, Telemetry &amp; Shipping Rigor
+                </h2>
+              </EditorialStaggerItem>
+              <EditorialStaggerItem yOffset={10}>
+                <ZigZagToSwooshUnderline
+                  align="center"
+                  widthClassName="w-48 sm:w-64"
+                  className="pt-0.5"
                 />
-              </div>
-              <h2
-                className="font-display text-[1.9rem] leading-[2.35rem] font-extrabold tracking-[-0.025em] text-slate-950 dark:text-[#f1f5f9] md:text-[2.75rem] md:leading-[3.2rem]"
-                style={{ textWrap: 'balance' }}
-              >
-                Bridging Customer Discovery, Telemetry &amp; Shipping Rigor
-              </h2>
-              <ZigZagToSwooshUnderline
-                align="center"
-                widthClassName="w-48 sm:w-64"
-                className="pt-0.5"
-              />
-            </div>
+              </EditorialStaggerItem>
+            </EditorialStaggerGroup>
           }
         >
           <div className="p-5 sm:p-7 md:p-9 lg:p-10">
           {/* 3-Column Architectural Grid separated by hairlines — zero nested cards */}
-          <div className="grid grid-cols-1 gap-px overflow-hidden rounded-2xl border border-slate-200 dark:border-white/[0.08] bg-slate-200 dark:bg-white/[0.08] lg:grid-cols-3">
+          <EditorialStaggerGroup
+            staggerDelay={0.08}
+            delayChildren={0.04}
+            className="grid grid-cols-1 gap-px overflow-hidden rounded-2xl border border-slate-200 dark:border-white/[0.08] bg-slate-200 dark:bg-white/[0.08] lg:grid-cols-3"
+          >
             {CAPABILITY_GROUPS.map((group) => (
-              <div
+              <EditorialStaggerItem
                 key={group.index}
+                yOffset={18}
                 className="bg-slate-50/50 dark:bg-[#10131a] p-6 md:p-7 transition-colors duration-200"
               >
                 <p className="font-mono text-xs font-semibold text-[#1d4ed8] dark:text-[#b5c4ff]">
@@ -96,7 +112,7 @@ export function CapabilitiesAndProofSection({
                 <h3 className="mt-2 font-display text-xl font-bold tracking-[-0.015em] text-slate-950 dark:text-[#f1f5f9]">
                   {group.title}
                 </h3>
-                <p className="mt-2.5 text-sm leading-[1.6] text-slate-600 dark:text-[#94a3b8]">
+                <p className="mt-2.5 text-sm leading-[1.68] text-slate-600 dark:text-[#94a3b8]">
                   {group.description}
                 </p>
 
@@ -106,15 +122,15 @@ export function CapabilitiesAndProofSection({
                       <dt className="font-display text-sm font-semibold text-slate-900 dark:text-[#e1e2ec]">
                         {item.name}
                       </dt>
-                      <dd className="mt-0.5 text-xs leading-[1.5] text-slate-600 dark:text-[#94a3b8]">
+                      <dd className="mt-0.5 text-xs leading-[1.62] text-slate-600 dark:text-[#94a3b8]">
                         {item.context}
                       </dd>
                     </div>
                   ))}
                 </dl>
-              </div>
+              </EditorialStaggerItem>
             ))}
-          </div>
+          </EditorialStaggerGroup>
 
           {/* Interactive Skills & Tech Stack Matrix */}
           <div className="mt-12 md:mt-14">
@@ -155,10 +171,16 @@ export function CapabilitiesAndProofSection({
               </div>
             </div>
 
-            <div className="mt-7 grid grid-cols-1 gap-px overflow-hidden rounded-2xl border border-slate-200 dark:border-white/[0.08] bg-slate-200 dark:bg-white/[0.08] sm:grid-cols-2 lg:grid-cols-3">
+            <EditorialStaggerGroup
+              key={stackFilter}
+              staggerDelay={0.045}
+              delayChildren={0.02}
+              className="mt-7 grid grid-cols-1 gap-px overflow-hidden rounded-2xl border border-slate-200 dark:border-white/[0.08] bg-slate-200 dark:bg-white/[0.08] sm:grid-cols-2 lg:grid-cols-3"
+            >
               {visibleTechItems.map((tech) => (
-                <div
+                <EditorialStaggerItem
                   key={tech.id}
+                  yOffset={14}
                   className="group flex flex-col justify-between bg-white dark:bg-[#0d111a] p-5 md:p-6 transition-colors duration-200 hover:bg-slate-50/90 dark:hover:bg-[#131926]"
                 >
                   <div>
@@ -190,23 +212,23 @@ export function CapabilitiesAndProofSection({
                       )}
                     </div>
 
-                    <p className="mt-3.5 text-xs leading-[1.6] text-slate-600 dark:text-[#94a3b8]">
+                    <p className="mt-3.5 text-xs leading-[1.68] text-slate-600 dark:text-[#94a3b8]">
                       {tech.usageSummary}
                     </p>
                   </div>
 
                   {/* Clean unboxed project attribution line */}
                   <div className="mt-4 border-t border-slate-100 dark:border-white/[0.06] pt-3">
-                    <p className="text-[11px] leading-[1.5] text-slate-500 dark:text-[#8d90a2]">
+                    <p className="text-[11px] leading-[1.58] text-slate-500 dark:text-[#8d90a2]">
                       <span className="font-semibold text-slate-700 dark:text-[#c3c5d8]">
                         Applied in:
                       </span>{' '}
                       {tech.projects.join(' · ')}
                     </p>
                   </div>
-                </div>
+                </EditorialStaggerItem>
               ))}
-            </div>
+            </EditorialStaggerGroup>
           </div>
 
           {/* Claim-to-Proof Adjacency: Attributable Executive Endorsements */}
@@ -222,57 +244,62 @@ export function CapabilitiesAndProofSection({
               </div>
             </div>
 
-            <div className="mt-7 grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <EditorialStaggerGroup
+              staggerDelay={0.1}
+              delayChildren={0.04}
+              className="mt-7 grid grid-cols-1 gap-6 lg:grid-cols-2"
+            >
               {TESTIMONIALS.map((item, idx) => (
-                <figure
-                  key={item.author}
-                  className={`surface-card flex flex-col justify-between rounded-2xl p-6 md:p-7 ${
-                    idx === 1 ? 'glow-champagne-corner' : 'glow-cobalt-corner'
-                  }`}
-                >
-                  <div>
-                    <blockquote className="text-base leading-[1.7] text-slate-800 dark:text-[#e1e2ec]">
-                      &ldquo;{item.quote}&rdquo;
-                    </blockquote>
-
-                    {/* Concrete before -> outcome proof line */}
-                    <div className="mt-6 space-y-1.5 border-t border-slate-200 dark:border-white/[0.08] pt-5 text-xs leading-[1.5]">
-                      <p className="text-slate-600 dark:text-[#94a3b8]">
-                        <span className="font-semibold text-slate-800 dark:text-[#c3c5d8]">
-                          Context:
-                        </span>{' '}
-                        {item.beforeContext}
-                      </p>
-                      <p className="text-slate-600 dark:text-[#94a3b8]">
-                        <span
-                          className={`font-semibold ${
-                            idx === 1
-                              ? 'text-[#a16207] dark:text-[#efbf68]'
-                              : 'text-[#1d4ed8] dark:text-[#b5c4ff]'
-                          }`}
-                        >
-                          Verified Outcome:
-                        </span>{' '}
-                        <span className="font-medium text-slate-900 dark:text-[#e1e2ec]">
-                          {item.outcome}
-                        </span>
-                      </p>
-                    </div>
-                  </div>
-
-                  <figcaption className="mt-6 flex items-center justify-between border-t border-slate-100 dark:border-white/[0.06] pt-4">
+                <EditorialStaggerItem key={item.author} yOffset={18} className="flex">
+                  <figure
+                    className={`surface-card flex w-full flex-col justify-between rounded-2xl p-6 md:p-7 ${
+                      idx === 1 ? 'glow-champagne-corner' : 'glow-cobalt-corner'
+                    }`}
+                  >
                     <div>
-                      <p className="font-display text-sm font-bold text-slate-950 dark:text-[#f1f5f9]">
-                        {item.author}
-                      </p>
-                      <p className="text-xs text-slate-600 dark:text-[#94a3b8]">
-                        {item.role} · {item.organization}
-                      </p>
+                      <blockquote className="text-base leading-[1.76] tracking-[0.01em] text-slate-800 dark:text-[#e1e2ec]">
+                        &ldquo;{item.quote}&rdquo;
+                      </blockquote>
+
+                      {/* Concrete before -> outcome proof line */}
+                      <div className="mt-6 space-y-1.5 border-t border-slate-200 dark:border-white/[0.08] pt-5 text-xs leading-[1.6]">
+                        <p className="text-slate-600 dark:text-[#94a3b8]">
+                          <span className="font-semibold text-slate-800 dark:text-[#c3c5d8]">
+                            Context:
+                          </span>{' '}
+                          {item.beforeContext}
+                        </p>
+                        <p className="text-slate-600 dark:text-[#94a3b8]">
+                          <span
+                            className={`font-semibold ${
+                              idx === 1
+                                ? 'text-[#a16207] dark:text-[#efbf68]'
+                                : 'text-[#1d4ed8] dark:text-[#b5c4ff]'
+                            }`}
+                          >
+                            Verified Outcome:
+                          </span>{' '}
+                          <span className="font-medium text-slate-900 dark:text-[#e1e2ec]">
+                            {item.outcome}
+                          </span>
+                        </p>
+                      </div>
                     </div>
-                  </figcaption>
-                </figure>
+
+                    <figcaption className="mt-6 flex items-center justify-between border-t border-slate-100 dark:border-white/[0.06] pt-4">
+                      <div>
+                        <p className="font-display text-sm font-bold text-slate-950 dark:text-[#f1f5f9]">
+                          {item.author}
+                        </p>
+                        <p className="text-xs text-slate-600 dark:text-[#94a3b8]">
+                          {item.role} · {item.organization}
+                        </p>
+                      </div>
+                    </figcaption>
+                  </figure>
+                </EditorialStaggerItem>
               ))}
-            </div>
+            </EditorialStaggerGroup>
           </div>
         </div>
       </ContainerScroll>

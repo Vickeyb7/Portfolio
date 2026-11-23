@@ -18,6 +18,10 @@ import { CoverSection } from './components/CoverSection';
 import { HeroSection } from './components/HeroSection';
 import { ScrollProgressBar } from './components/ui/scroll-progress-bar';
 import { MagneticCursor } from './components/ui/magnetic-cursor';
+import { HandDrawnDivider } from './components/ui/hand-drawn-divider';
+import { ScrollTargetAnchor } from './components/ui/scroll-target-anchor';
+import { ScrollSpyDebugLine } from './components/ui/scroll-spy-debug-line';
+import { SectionHighlighter } from './components/ui/section-highlighter';
 import { SectionSeoHead } from './components/SectionSeoHead';
 import {
   CASE_STUDIES,
@@ -127,6 +131,12 @@ const ENTRANCE_EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
 const DEFAULT_HEADER_HEIGHT = 72;
 const SCROLL_PADDING_BUFFER = 4;
 
+interface ScrollSpyMetrics {
+  headerHeight: number;
+  buffer: number;
+  triggerY: number;
+}
+
 function getStickyHeaderHeight(): number {
   if (typeof document === 'undefined') return DEFAULT_HEADER_HEIGHT;
   const headerEl = document.querySelector<HTMLElement>(
@@ -137,6 +147,18 @@ function getStickyHeaderHeight(): number {
   return Number.isFinite(measured) && measured > 0
     ? Math.round(measured)
     : DEFAULT_HEADER_HEIGHT;
+}
+
+function computeScrollSpyMetrics(): ScrollSpyMetrics {
+  const headerHeight = getStickyHeaderHeight();
+  const viewportHeight =
+    typeof window !== 'undefined' ? window.innerHeight : 800;
+  const buffer = Math.round(Math.min(120, viewportHeight * 0.18));
+  return {
+    headerHeight,
+    buffer,
+    triggerY: headerHeight + buffer,
+  };
 }
 
 interface SectionErrorBoundaryState {
@@ -312,6 +334,12 @@ export default function App() {
   const [activeCaseStudy, setActiveCaseStudy] = useState<CaseStudy | null>(null);
   const [resumeOpen, setResumeOpen] = useState(false);
   const [prefilledTopic, setPrefilledTopic] = useState<string | null>(null);
+  const [isThankYouVisible, setIsThankYouVisible] = useState(false);
+  const [scrollMetrics, setScrollMetrics] = useState<ScrollSpyMetrics>(() =>
+    computeScrollSpyMetrics()
+  );
+
+  const stickyHeaderOffset = scrollMetrics.headerHeight + SCROLL_PADDING_BUFFER;
 
   // Untransformed outer anchor refs for exact scroll-to and scroll-spy geometry
   const mainRef = useRef<HTMLElement>(null);
@@ -413,6 +441,7 @@ export default function App() {
   const scrollToSection = useCallback(
     (id: SectionId) => {
       setActiveSection(id);
+      setIsThankYouVisible(id === 'contact');
       setRevealedSections((prev) => ({ ...prev, [id]: true }));
       scrollLockUntilRef.current = performance.now() + 1000;
       pendingScrollTargetRef.current = id;
@@ -462,7 +491,22 @@ export default function App() {
       pendingScrollTargetRef.current = null;
     };
 
+    const syncScrollMetrics = (): ScrollSpyMetrics => {
+      const next = computeScrollSpyMetrics();
+      setScrollMetrics((prev) =>
+        prev.headerHeight === next.headerHeight &&
+        prev.buffer === next.buffer &&
+        prev.triggerY === next.triggerY
+          ? prev
+          : next
+      );
+      return next;
+    };
+
     const updateActiveSection = () => {
+      // Keep live sticky-header height & triggerY metrics synced even during nav scroll locks
+      const { triggerY } = syncScrollMetrics();
+
       if (performance.now() < scrollLockUntilRef.current) {
         return;
       }
@@ -475,13 +519,9 @@ export default function App() {
 
       if (atBottom) {
         setActiveSection((prev) => (prev === 'contact' ? prev : 'contact'));
+        setIsThankYouVisible(true);
         return;
       }
-
-      // Re-query the live sticky header height on every check so triggerY stays accurate
-      const headerHeight = getStickyHeaderHeight();
-      const activationBand = Math.round(Math.min(120, window.innerHeight * 0.18));
-      const triggerY = headerHeight + activationBand;
 
       let currentId: SectionId = 'overview';
 
@@ -490,14 +530,27 @@ export default function App() {
         if (!el) continue;
 
         const rect = el.getBoundingClientRect();
-        if (!Number.isFinite(rect.top) || rect.height <= 0) continue;
+        const isExplicitAnchor = el.dataset.scrollTarget === 'true';
+        if (!Number.isFinite(rect.top) || (!isExplicitAnchor && rect.height <= 0)) {
+          continue;
+        }
 
         if (rect.top <= triggerY) {
           currentId = id;
         }
       }
 
+      const contactEl = resolveSectionElement('contact');
+      const thankYouInViewport =
+        currentId === 'contact' ||
+        (contactEl !== null &&
+          Number.isFinite(contactEl.getBoundingClientRect().top) &&
+          contactEl.getBoundingClientRect().top <= window.innerHeight * 0.55);
+
       setActiveSection((prev) => (prev === currentId ? prev : currentId));
+      setIsThankYouVisible((prev) =>
+        prev === thankYouInViewport ? prev : thankYouInViewport
+      );
     };
 
     updateActiveSection();
@@ -579,45 +632,73 @@ export default function App() {
         />
         <ScrollProgressBar isDark={false} />
         <MagneticCursor isDark={false} />
+        {import.meta.env.DEV && (
+          <ScrollSpyDebugLine
+            headerHeight={scrollMetrics.headerHeight}
+            buffer={scrollMetrics.buffer}
+            triggerY={scrollMetrics.triggerY}
+            activeSection={activeSection}
+          />
+        )}
 
         <Navbar
           activeSection={activeSection}
+          showResumeButton={isThankYouVisible}
           onNavigate={scrollToSection}
           onOpenResume={() => setResumeOpen(true)}
         />
 
         <main ref={mainRef} className="no-print">
-          {/* Canonical untransformed anchor containers prevent motion transform offset drift */}
-          <div
-            id="overview"
-            ref={registerSectionRef('overview')}
-            className="scroll-mt-[76px]"
+          {/* Top overview container + transparent ScrollTargetAnchor markers for remaining sections */}
+          <SectionHighlighter
+            sectionId="overview"
+            isActive={activeSection === 'overview'}
+            tone="paper"
+            variant="cobalt"
           >
-            <CoverSection isDark={false} onExploreBelow={scrollToHero} />
+            <div
+              id="overview"
+              ref={registerSectionRef('overview')}
+              style={{ scrollMarginTop: `${stickyHeaderOffset}px` }}
+            >
+              <CoverSection isDark={false} onExploreBelow={scrollToHero} />
 
-            <div ref={heroAnchorRef} className="scroll-mt-[76px]">
-              <SectionReveal forceVisible={!!revealedSections.overview} delay={0.04}>
-                <HeroSection
-                  onOpenResume={() => setResumeOpen(true)}
-                  onJumpToCaseStudies={() => scrollToSection('case-studies')}
-                />
+              <div
+                ref={heroAnchorRef}
+                style={{ scrollMarginTop: `${stickyHeaderOffset}px` }}
+              >
+                <SectionReveal forceVisible={!!revealedSections.overview} delay={0.04}>
+                  <HeroSection
+                    onOpenResume={() => setResumeOpen(true)}
+                    onJumpToCaseStudies={() => scrollToSection('case-studies')}
+                  />
+                </SectionReveal>
+              </div>
+
+              <SectionReveal delay={0.04}>
+                <SectionErrorBoundary label="product showcase">
+                  <Suspense fallback={<SectionSkeleton label="product showcase" />}>
+                    <ProductShowcaseScroll onSelectCaseStudy={setActiveCaseStudy} />
+                  </Suspense>
+                </SectionErrorBoundary>
               </SectionReveal>
             </div>
+          </SectionHighlighter>
 
-            <SectionReveal delay={0.04}>
-              <SectionErrorBoundary label="product showcase">
-                <Suspense fallback={<SectionSkeleton label="product showcase" />}>
-                  <ProductShowcaseScroll onSelectCaseStudy={setActiveCaseStudy} />
-                </Suspense>
-              </SectionErrorBoundary>
-            </SectionReveal>
-          </div>
+          <HandDrawnDivider variant="loop" />
 
-          <div
-            id="case-studies"
-            ref={registerSectionRef('case-studies')}
-            className="scroll-mt-[76px]"
+          <SectionHighlighter
+            sectionId="case-studies"
+            isActive={activeSection === 'case-studies'}
+            tone="paper"
+            variant="champagne"
           >
+            <ScrollTargetAnchor
+              id="case-studies"
+              label="Case Studies"
+              ref={registerSectionRef('case-studies')}
+              headerOffset={stickyHeaderOffset}
+            />
             <SectionReveal
               forceVisible={!!revealedSections['case-studies']}
               delay={0.04}
@@ -628,13 +709,22 @@ export default function App() {
                 </Suspense>
               </SectionErrorBoundary>
             </SectionReveal>
-          </div>
+          </SectionHighlighter>
 
-          <div
-            id="experience"
-            ref={registerSectionRef('experience')}
-            className="scroll-mt-[76px]"
+          <HandDrawnDivider variant="wave" />
+
+          <SectionHighlighter
+            sectionId="experience"
+            isActive={activeSection === 'experience'}
+            tone="night"
+            variant="cobalt"
           >
+            <ScrollTargetAnchor
+              id="experience"
+              label="Experience"
+              ref={registerSectionRef('experience')}
+              headerOffset={stickyHeaderOffset}
+            />
             <SectionReveal
               forceVisible={!!revealedSections.experience}
               delay={0.04}
@@ -645,13 +735,22 @@ export default function App() {
                 </Suspense>
               </SectionErrorBoundary>
             </SectionReveal>
-          </div>
+          </SectionHighlighter>
 
-          <div
-            id="capabilities"
-            ref={registerSectionRef('capabilities')}
-            className="scroll-mt-[76px]"
+          <HandDrawnDivider variant="diamond" />
+
+          <SectionHighlighter
+            sectionId="capabilities"
+            isActive={activeSection === 'capabilities'}
+            tone="paper"
+            variant="indigo"
           >
+            <ScrollTargetAnchor
+              id="capabilities"
+              label="Capabilities"
+              ref={registerSectionRef('capabilities')}
+              headerOffset={stickyHeaderOffset}
+            />
             <SectionReveal
               forceVisible={!!revealedSections.capabilities}
               delay={0.04}
@@ -664,7 +763,9 @@ export default function App() {
                 </Suspense>
               </SectionErrorBoundary>
             </SectionReveal>
-          </div>
+          </SectionHighlighter>
+
+          <HandDrawnDivider variant="loop" />
 
           <SectionReveal delay={0.04}>
             <SectionErrorBoundary label="fun facts">
@@ -674,11 +775,18 @@ export default function App() {
             </SectionErrorBoundary>
           </SectionReveal>
 
-          <div
-            id="contact"
-            ref={registerSectionRef('contact')}
-            className="scroll-mt-[76px]"
+          <SectionHighlighter
+            sectionId="contact"
+            isActive={activeSection === 'contact'}
+            tone="paper"
+            variant="champagne"
           >
+            <ScrollTargetAnchor
+              id="contact"
+              label="Contact"
+              ref={registerSectionRef('contact')}
+              headerOffset={stickyHeaderOffset}
+            />
             <SectionReveal forceVisible={!!revealedSections.contact} delay={0.04}>
               <SectionErrorBoundary label="thank you closing sheet">
                 <Suspense fallback={<SectionSkeleton label="closing sheet" />}>
@@ -692,7 +800,7 @@ export default function App() {
                 </Suspense>
               </SectionErrorBoundary>
             </SectionReveal>
-          </div>
+          </SectionHighlighter>
         </main>
 
         {/* On-demand code-split interactive overlays */}

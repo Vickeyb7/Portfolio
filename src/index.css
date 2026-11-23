@@ -37,8 +37,17 @@ body {
     radial-gradient(60% 38% at 12% 0%, rgba(79, 109, 245, 0.055) 0%, rgba(235, 230, 220, 0) 68%),
     radial-gradient(45% 32% at 90% 8%, rgba(180, 130, 62, 0.055) 0%, rgba(235, 230, 220, 0) 68%);
   background-attachment: fixed;
+  line-height: 1.72;
+  letter-spacing: 0.012em;
   overflow-x: clip;
   transition: background-color 220ms ease, color 220ms ease;
+}
+
+main p,
+main li,
+main dd {
+  line-height: 1.72;
+  letter-spacing: 0.012em;
 }
 
 html.dark body {
@@ -73,6 +82,8 @@ html.dark body {
 
 .font-hand {
   font-family: var(--font-hand);
+  line-height: 1.54;
+  letter-spacing: 0.015em;
 }
 
 h1,
@@ -589,8 +600,16 @@ html.dark .editorial-scroll::-webkit-scrollbar-thumb:hover {
   100% { transform: translateY(-1px) scale(1.08); }
 }
 
+.nimbus-nav[data-compact="true"] {
+  padding: 4px;
+  gap: 2px;
+}
+
 .nimbus-nav[data-compact="true"] .nimbus-item {
-  padding: 0 12px;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  justify-content: center;
 }
 
 .nimbus-nav[data-compact="true"] .nimbus-label {
@@ -602,9 +621,16 @@ html.dark .editorial-scroll::-webkit-scrollbar-thumb:hover {
   white-space: nowrap;
 }
 
-@media (max-width: 520px) {
+@media (max-width: 479px) {
+  .nimbus-nav:not([data-compact="false"]) {
+    padding: 4px;
+    gap: 2px;
+  }
   .nimbus-nav:not([data-compact="false"]) .nimbus-item {
-    padding: 0 12px;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    justify-content: center;
   }
   .nimbus-nav:not([data-compact="false"]) .nimbus-label {
     position: absolute;

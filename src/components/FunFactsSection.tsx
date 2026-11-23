@@ -2,6 +2,7 @@ import { useCallback, useLayoutEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { EditorialSheet } from './ui/editorial-sheet';
+import { EditorialStaggerGroup, EditorialStaggerItem } from './ui/editorial-stagger';
 import { PenAnnotation, ZigZagToSwooshUnderline } from './ui/pen-annotations';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -277,7 +278,7 @@ function DoodleCard({ item }: { item: FunFactDoodle }) {
       onFocus={handleHoverWiggle}
       onClick={handleClickRedraw}
       aria-label={`${item.title}: ${item.fact} Click to redraw illustration.`}
-      className="group relative flex flex-col justify-between bg-[#181c27]/90 hover:bg-[#1e2332] p-6 sm:p-7 text-left transition-colors duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#8aa2ff]"
+      className="group relative flex h-full w-full flex-col justify-between bg-[#181c27]/90 hover:bg-[#1e2332] p-6 sm:p-7 text-left transition-colors duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#8aa2ff]"
     >
       <div>
         {/* Top editorial row: clean index & interactive redraw hint */}
@@ -327,7 +328,7 @@ function DoodleCard({ item }: { item: FunFactDoodle }) {
           {item.title}
         </h3>
 
-        <p className="mt-2 text-sm leading-[1.6] text-[#a7b0c8]">
+        <p className="mt-2 text-sm leading-[1.7] text-[#a7b0c8]">
           {item.fact}
         </p>
       </div>
@@ -349,44 +350,66 @@ export function FunFactsSection() {
         sheetLabel="Fun Facts"
       >
         <div className="mx-auto max-w-[1280px] px-5 pt-8 pb-16 sm:px-6 md:px-8 md:pt-12 md:pb-24 lg:px-12">
-          <div className="mx-auto max-w-3xl text-center space-y-3">
-            <div className="flex flex-wrap items-center justify-center gap-3">
-              <p className="font-display text-xs font-semibold tracking-[0.04em] pen-ink-text">
-                Beyond the PRD
-              </p>
-              <PenAnnotation
-                text="hover to wiggle · click to redraw"
-                arrow="down-right"
-                tilt="rotate-2"
-                className="hidden sm:inline-flex"
+          <EditorialStaggerGroup
+            staggerDelay={0.075}
+            delayChildren={0.04}
+            className="mx-auto max-w-3xl text-center space-y-3"
+          >
+            <EditorialStaggerItem yOffset={12}>
+              <div className="flex flex-wrap items-center justify-center gap-3">
+                <p className="font-display text-xs font-semibold tracking-[0.04em] pen-ink-text">
+                  Beyond the PRD
+                </p>
+                <PenAnnotation
+                  text="hover to wiggle · click to redraw"
+                  arrow="down-right"
+                  tilt="rotate-2"
+                  className="hidden sm:inline-flex"
+                />
+              </div>
+            </EditorialStaggerItem>
+
+            <EditorialStaggerItem yOffset={16}>
+              <h2
+                className="font-display text-[1.95rem] leading-[2.4rem] font-extrabold tracking-[-0.025em] text-[#f4f6fc] md:text-[2.75rem] md:leading-[3.2rem]"
+                style={{ textWrap: 'balance' }}
+              >
+                Six Small Truths Behind the Work
+              </h2>
+            </EditorialStaggerItem>
+
+            <EditorialStaggerItem yOffset={10}>
+              <ZigZagToSwooshUnderline
+                align="center"
+                widthClassName="w-48 sm:w-60"
+                className="pt-0.5"
               />
-            </div>
+            </EditorialStaggerItem>
 
-            <h2
-              className="font-display text-[1.95rem] leading-[2.4rem] font-extrabold tracking-[-0.025em] text-[#f4f6fc] md:text-[2.75rem] md:leading-[3.2rem]"
-              style={{ textWrap: 'balance' }}
-            >
-              Six Small Truths Behind the Work
-            </h2>
-
-            <ZigZagToSwooshUnderline
-              align="center"
-              widthClassName="w-48 sm:w-60"
-              className="pt-0.5"
-            />
-
-            <p className="mx-auto max-w-xl text-base leading-[1.65] text-[#9aa4c2]">
-              Hand-drawn field notes from four years of building with engineers,
-              debating scope, and chasing honest product signals.
-            </p>
-          </div>
+            <EditorialStaggerItem yOffset={14}>
+              <p className="mx-auto max-w-xl text-base leading-[1.74] text-[#9aa4c2]">
+                Hand-drawn field notes from four years of building with engineers,
+                debating scope, and chasing honest product signals.
+              </p>
+            </EditorialStaggerItem>
+          </EditorialStaggerGroup>
 
           {/* 3x2 Single-elevation hairline grid of six interactive doodles */}
-          <div className="mt-12 grid grid-cols-1 gap-px overflow-hidden rounded-2xl border border-white/[0.09] bg-white/[0.09] sm:grid-cols-2 lg:grid-cols-3">
+          <EditorialStaggerGroup
+            staggerDelay={0.07}
+            delayChildren={0.05}
+            className="mt-12 grid grid-cols-1 gap-px overflow-hidden rounded-2xl border border-white/[0.09] bg-white/[0.09] sm:grid-cols-2 lg:grid-cols-3"
+          >
             {FUN_FACTS.map((item) => (
-              <DoodleCard key={item.id} item={item} />
+              <EditorialStaggerItem
+                key={item.id}
+                yOffset={18}
+                className="flex bg-[#181c27]/90"
+              >
+                <DoodleCard item={item} />
+              </EditorialStaggerItem>
             ))}
-          </div>
+          </EditorialStaggerGroup>
         </div>
       </EditorialSheet>
     </section>

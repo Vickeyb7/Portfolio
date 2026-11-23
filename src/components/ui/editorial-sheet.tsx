@@ -1,6 +1,7 @@
 import { ReactNode, useLayoutEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { SectionInkWashLayer, useSectionHighlight } from './section-highlighter';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -30,6 +31,7 @@ export function EditorialSheet({
   const triggerRef = useRef<HTMLDivElement>(null);
   const surfaceRef = useRef<HTMLDivElement>(null);
   const cardOutlineRef = useRef<HTMLDivElement>(null);
+  const highlight = useSectionHighlight();
 
   useLayoutEffect(() => {
     const triggerEl = triggerRef.current;
@@ -141,6 +143,16 @@ export function EditorialSheet({
           isPaper ? 'editorial-sheet-paper' : 'editorial-sheet-night'
         }`}
       >
+        {/* Active-section animated ink-wash overlay behind sheet typography */}
+        {highlight && (
+          <SectionInkWashLayer
+            isActive={highlight.isActive}
+            tone={tone}
+            variant={highlight.variant}
+            className="z-0"
+          />
+        )}
+
         {/* Ultra-fine archival paper fiber / nocturnal grain overlay */}
         <div
           aria-hidden="true"
@@ -182,15 +194,6 @@ export function EditorialSheet({
               {sheetLabel}
             </span>
           </div>
-
-          <span
-            aria-hidden="true"
-            className={`hidden sm:inline-block font-mono text-[10px] tracking-[0.14em] uppercase ${
-              isPaper ? 'text-[#7c7364]' : 'text-[#6c7694]'
-            }`}
-          >
-            {isPaper ? 'Archival Paper' : 'Charcoal Night'}
-          </span>
         </div>
 
         {/* Sheet body */}
