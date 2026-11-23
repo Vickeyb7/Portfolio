@@ -9,6 +9,8 @@ import {
   TESTIMONIALS,
 } from '../data/portfolioData';
 import { ContainerScroll } from './ui/container-scroll-animation';
+import { EditorialSheet } from './ui/editorial-sheet';
+import { PenAnnotation, ZigZagToSwooshUnderline } from './ui/pen-annotations';
 import { TechLogoMark } from './TechLogoMark';
 
 interface CapabilitiesAndProofSectionProps {
@@ -44,27 +46,43 @@ export function CapabilitiesAndProofSection({
   };
 
   return (
-    <section
-      aria-label="Capabilities and Endorsements"
-      className="overflow-hidden border-t border-slate-200/80 dark:border-white/[0.06]"
-    >
-      <ContainerScroll
-        variant="section"
-        titleComponent={
-          <div className="space-y-3">
-            <p className="font-display text-xs font-semibold tracking-[0.04em] text-[#0369a1] dark:text-[#38bdf8]">
-              Operating Stack &amp; Craft
-            </p>
-            <h2
-              className="font-display text-[1.9rem] leading-[2.35rem] font-extrabold tracking-[-0.025em] text-slate-950 dark:text-[#f1f5f9] md:text-[2.75rem] md:leading-[3.2rem]"
-              style={{ textWrap: 'balance' }}
-            >
-              Bridging Customer Discovery, Telemetry &amp; Shipping Rigor
-            </h2>
-          </div>
-        }
+    <section aria-label="Capabilities and Endorsements">
+      <EditorialSheet
+        tone="paper"
+        sheetNumber="05"
+        sheetLabel="Craft & Operating Stack"
       >
-        <div className="p-5 sm:p-7 md:p-9 lg:p-10">
+        <ContainerScroll
+          variant="section"
+          surface="paper"
+          titleComponent={
+            <div className="space-y-3">
+              <div className="flex flex-wrap items-center justify-center gap-3">
+                <p className="font-display text-xs font-semibold tracking-[0.04em] pen-ink-text">
+                  Operating Stack &amp; Craft
+                </p>
+                <PenAnnotation
+                  text="shipped & tested in production"
+                  arrow="left-loop"
+                  tilt="-rotate-2"
+                  className="hidden sm:inline-flex"
+                />
+              </div>
+              <h2
+                className="font-display text-[1.9rem] leading-[2.35rem] font-extrabold tracking-[-0.025em] text-slate-950 dark:text-[#f1f5f9] md:text-[2.75rem] md:leading-[3.2rem]"
+                style={{ textWrap: 'balance' }}
+              >
+                Bridging Customer Discovery, Telemetry &amp; Shipping Rigor
+              </h2>
+              <ZigZagToSwooshUnderline
+                align="center"
+                widthClassName="w-48 sm:w-64"
+                className="pt-0.5"
+              />
+            </div>
+          }
+        >
+          <div className="p-5 sm:p-7 md:p-9 lg:p-10">
           {/* 3-Column Architectural Grid separated by hairlines — zero nested cards */}
           <div className="grid grid-cols-1 gap-px overflow-hidden rounded-2xl border border-slate-200 dark:border-white/[0.08] bg-slate-200 dark:bg-white/[0.08] lg:grid-cols-3">
             {CAPABILITY_GROUPS.map((group) => (
@@ -258,6 +276,7 @@ export function CapabilitiesAndProofSection({
           </div>
         </div>
       </ContainerScroll>
+      </EditorialSheet>
     </section>
   );
 }

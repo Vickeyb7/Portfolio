@@ -2,6 +2,8 @@ import { ArrowRight, FileText, MapPin } from 'lucide-react';
 import { HERO_METRICS, PROFILE } from '../data/portfolioData';
 import { ResilientImage } from './ResilientImage';
 import { ContainerScroll } from './ui/container-scroll-animation';
+import { EditorialSheet } from './ui/editorial-sheet';
+import { PenAnnotation, ZigZagToSwooshUnderline } from './ui/pen-annotations';
 
 interface HeroSectionProps {
   onOpenResume: () => void;
@@ -10,28 +12,47 @@ interface HeroSectionProps {
 
 export function HeroSection({ onOpenResume, onJumpToCaseStudies }: HeroSectionProps) {
   return (
-    <section aria-label="Overview" className="relative overflow-hidden">
-      <ContainerScroll variant="hero">
-        <div className="p-6 sm:p-8 md:p-10 lg:p-12">
-          {/* Split-screen executive hero: items-stretch for balanced 2-column geometry */}
-          <div className="grid grid-cols-1 gap-10 lg:grid-cols-12 lg:items-stretch lg:gap-12">
-            {/* Left column: Typographic authority & decisive actions */}
-            <div className="flex flex-col justify-between lg:col-span-7 lg:py-2">
-              <div>
-                <p className="font-display text-sm font-semibold tracking-[0.02em] text-[#1d4ed8] dark:text-[#b5c4ff]">
-                  {PROFILE.kicker}
-                </p>
+    <section aria-label="Overview" className="relative">
+      <EditorialSheet
+        tone="paper"
+        sheetNumber="01"
+        sheetLabel="Executive Overview"
+      >
+        <ContainerScroll variant="hero" surface="paper">
+          <div className="p-6 sm:p-8 md:p-10 lg:p-12">
+            {/* Split-screen executive hero: items-stretch for balanced 2-column geometry */}
+            <div className="grid grid-cols-1 gap-10 lg:grid-cols-12 lg:items-stretch lg:gap-12">
+              {/* Left column: Typographic authority & decisive actions */}
+              <div className="flex flex-col justify-between lg:col-span-7 lg:py-2">
+                <div>
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <p className="font-display text-sm font-semibold tracking-[0.02em] pen-ink-text">
+                      {PROFILE.kicker}
+                    </p>
+                    <PenAnnotation
+                      text="4+ yrs enterprise GTM → product"
+                      arrow="down-left"
+                      tilt="-rotate-2"
+                      className="hidden sm:inline-flex"
+                    />
+                  </div>
 
-                <h2
-                  className="mt-5 font-display text-[2.15rem] leading-[2.6rem] font-extrabold tracking-[-0.025em] text-slate-950 dark:text-[#f1f5f9] sm:text-[2.75rem] sm:leading-[3.25rem] lg:text-[3.35rem] lg:leading-[3.85rem] lg:tracking-[-0.03em]"
-                  style={{ textWrap: 'balance' }}
-                >
-                  {PROFILE.headline}
-                </h2>
+                  <h2
+                    className="mt-4 font-display text-[2.15rem] leading-[2.6rem] font-extrabold tracking-[-0.025em] text-slate-950 dark:text-[#f1f5f9] sm:text-[2.75rem] sm:leading-[3.25rem] lg:text-[3.35rem] lg:leading-[3.85rem] lg:tracking-[-0.03em]"
+                    style={{ textWrap: 'balance' }}
+                  >
+                    {PROFILE.headline}
+                  </h2>
 
-                <p className="mt-6 max-w-[60ch] text-base leading-[1.7] text-slate-600 dark:text-[#c3c5d8] md:text-[1.1rem] md:leading-[1.75rem] tracking-[-0.005em]">
-                  {PROFILE.subheadline}
-                </p>
+                  <ZigZagToSwooshUnderline
+                    align="left"
+                    widthClassName="w-48 sm:w-60"
+                    className="mt-3"
+                  />
+
+                  <p className="mt-5 max-w-[60ch] text-base leading-[1.7] text-slate-600 dark:text-[#c3c5d8] md:text-[1.1rem] md:leading-[1.75rem] tracking-[-0.005em]">
+                    {PROFILE.subheadline}
+                  </p>
 
                 {/* Editorial meta line — clean unboxed typography */}
                 <div className="mt-7 flex flex-wrap items-center gap-x-3 gap-y-2 text-sm text-slate-600 dark:text-[#94a3b8]">
@@ -148,6 +169,7 @@ export function HeroSection({ onOpenResume, onJumpToCaseStudies }: HeroSectionPr
           </div>
         </div>
       </ContainerScroll>
+      </EditorialSheet>
     </section>
   );
 }

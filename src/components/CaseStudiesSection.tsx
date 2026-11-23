@@ -3,6 +3,8 @@ import { Award, ChevronRight, Search, X } from 'lucide-react';
 import { CASE_STUDIES, CaseCategory, CaseStudy } from '../data/portfolioData';
 import { ResilientImage } from './ResilientImage';
 import { ContainerScroll } from './ui/container-scroll-animation';
+import { EditorialSheet } from './ui/editorial-sheet';
+import { PenAnnotation, ZigZagToSwooshUnderline } from './ui/pen-annotations';
 
 interface CaseStudiesSectionProps {
   onSelectCaseStudy: (study: CaseStudy) => void;
@@ -42,31 +44,47 @@ export function CaseStudiesSection({ onSelectCaseStudy }: CaseStudiesSectionProp
   }, [activeFilter, searchQuery]);
 
   return (
-    <section
-      aria-label="Case Studies"
-      className="overflow-hidden border-t border-slate-200/80 dark:border-white/[0.06]"
-    >
-      <ContainerScroll
-        variant="section"
-        titleComponent={
-          <div className="space-y-3">
-            <p className="font-display text-xs font-semibold tracking-[0.04em] text-[#0369a1] dark:text-[#38bdf8]">
-              Selected Product Artifacts
-            </p>
-            <h2
-              className="font-display text-[1.9rem] leading-[2.35rem] font-extrabold tracking-[-0.025em] text-slate-950 dark:text-[#f1f5f9] md:text-[2.75rem] md:leading-[3.2rem]"
-              style={{ textWrap: 'balance' }}
-            >
-              Product Case Studies &amp; Shipped Specs
-            </h2>
-            <p className="mx-auto max-w-2xl text-base leading-[1.6] text-slate-600 dark:text-[#94a3b8]">
-              Each brief opens an interactive artifact drawer with full PRD framing, RICE
-              prioritization tables, and user journey diagnostics.
-            </p>
-          </div>
-        }
+    <section aria-label="Case Studies">
+      <EditorialSheet
+        tone="paper"
+        sheetNumber="03"
+        sheetLabel="Product Briefs"
       >
-        <div className="p-5 sm:p-7 md:p-9 lg:p-10">
+        <ContainerScroll
+          variant="section"
+          surface="paper"
+          titleComponent={
+            <div className="space-y-3">
+              <div className="flex flex-wrap items-center justify-center gap-3">
+                <p className="font-display text-xs font-semibold tracking-[0.04em] pen-ink-text">
+                  Selected Product Artifacts
+                </p>
+                <PenAnnotation
+                  text="click any brief for full PRD + RICE"
+                  arrow="down-left"
+                  tilt="-rotate-2"
+                  className="hidden sm:inline-flex"
+                />
+              </div>
+              <h2
+                className="font-display text-[1.9rem] leading-[2.35rem] font-extrabold tracking-[-0.025em] text-slate-950 dark:text-[#f1f5f9] md:text-[2.75rem] md:leading-[3.2rem]"
+                style={{ textWrap: 'balance' }}
+              >
+                Product Case Studies &amp; Shipped Specs
+              </h2>
+              <ZigZagToSwooshUnderline
+                align="center"
+                widthClassName="w-48 sm:w-60"
+                className="pt-0.5"
+              />
+              <p className="mx-auto max-w-2xl text-base leading-[1.6] text-slate-600 dark:text-[#94a3b8]">
+                Each brief opens an interactive artifact drawer with full PRD framing, RICE
+                prioritization tables, and user journey diagnostics.
+              </p>
+            </div>
+          }
+        >
+          <div className="p-5 sm:p-7 md:p-9 lg:p-10">
           {/* Interactive segmented filter bar + search input */}
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div
@@ -282,6 +300,7 @@ export function CaseStudiesSection({ onSelectCaseStudy }: CaseStudiesSectionProp
           )}
         </div>
       </ContainerScroll>
+      </EditorialSheet>
     </section>
   );
 }

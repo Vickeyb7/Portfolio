@@ -9,6 +9,8 @@ import {
 } from 'lucide-react';
 import { PROFILE } from '../data/portfolioData';
 import { ContainerScroll } from './ui/container-scroll-animation';
+import { EditorialSheet } from './ui/editorial-sheet';
+import { PenAnnotation, ZigZagToSwooshUnderline } from './ui/pen-annotations';
 
 interface ContactSectionProps {
   prefilledTopic: string | null;
@@ -77,27 +79,43 @@ export function ContactSection({
   };
 
   return (
-    <section
-      aria-label="Contact"
-      className="overflow-hidden border-t border-slate-200/80 dark:border-white/[0.06]"
-    >
-      <ContainerScroll
-        variant="section"
-        titleComponent={
-          <div className="space-y-3">
-            <p className="font-display text-xs font-semibold tracking-[0.04em] text-[#0369a1] dark:text-[#38bdf8]">
-              Direct Inquiry
-            </p>
-            <h2
-              className="font-display text-[1.9rem] leading-[2.35rem] font-extrabold tracking-[-0.025em] text-slate-950 dark:text-[#f1f5f9] md:text-[2.75rem] md:leading-[3.2rem]"
-              style={{ textWrap: 'balance' }}
-            >
-              Let&rsquo;s Talk Product, Growth &amp; Enterprise Scale.
-            </h2>
-          </div>
-        }
+    <section aria-label="Contact">
+      <EditorialSheet
+        tone="paper"
+        sheetNumber="06"
+        sheetLabel="Direct Correspondence"
       >
-        <div className="p-6 sm:p-8 md:p-10">
+        <ContainerScroll
+          variant="section"
+          surface="paper"
+          titleComponent={
+            <div className="space-y-3">
+              <div className="flex flex-wrap items-center justify-center gap-3">
+                <p className="font-display text-xs font-semibold tracking-[0.04em] pen-ink-text">
+                  Direct Inquiry
+                </p>
+                <PenAnnotation
+                  text="usually replies within 24h"
+                  arrow="down-right"
+                  tilt="rotate-2"
+                  className="hidden sm:inline-flex"
+                />
+              </div>
+              <h2
+                className="font-display text-[1.9rem] leading-[2.35rem] font-extrabold tracking-[-0.025em] text-slate-950 dark:text-[#f1f5f9] md:text-[2.75rem] md:leading-[3.2rem]"
+                style={{ textWrap: 'balance' }}
+              >
+                Let&rsquo;s Talk Product, Growth &amp; Enterprise Scale.
+              </h2>
+              <ZigZagToSwooshUnderline
+                align="center"
+                widthClassName="w-48 sm:w-64"
+                className="pt-0.5"
+              />
+            </div>
+          }
+        >
+          <div className="p-6 sm:p-8 md:p-10">
           <div className="grid grid-cols-1 gap-10 lg:grid-cols-12 lg:gap-12">
             {/* Left: Executive Direct Channels */}
             <div className="lg:col-span-5 flex flex-col justify-between">
@@ -338,6 +356,7 @@ export function ContactSection({
           </div>
         </div>
       </ContainerScroll>
+      </EditorialSheet>
     </section>
   );
 }

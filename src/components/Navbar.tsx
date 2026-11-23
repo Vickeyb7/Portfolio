@@ -1,22 +1,17 @@
 import { useEffect, useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import { ChevronRight, Mail, Menu, Moon, Sun, X } from 'lucide-react';
+import { ChevronRight, Mail, Menu, X } from 'lucide-react';
 import { NAV_SECTIONS, PROFILE, SectionId } from '../data/portfolioData';
-import { LiquidGlassSwitch } from './ui/liquid-glass-toggle-switch';
 import { LiquidNavbar, LiquidNavItem } from './ui/liquid-glass-navbar';
 import ArrowFillButton from './ui/arrow-fill-button';
 
 interface NavbarProps {
-  isDark: boolean;
-  onToggleDark: (dark: boolean) => void;
   activeSection: SectionId;
   onNavigate: (id: SectionId) => void;
   onOpenResume: () => void;
 }
 
 export function Navbar({
-  isDark,
-  onToggleDark,
   activeSection,
   onNavigate,
   onOpenResume,
@@ -87,16 +82,21 @@ export function Navbar({
         }`}
       >
         <div className="mx-auto flex h-[72px] max-w-[1280px] items-center justify-between gap-4 xl:gap-6 px-5 md:px-8 lg:px-10 xl:px-12">
-          {/* Zone 1: Single text wordmark */}
+          {/* Zone 1: Custom Champagne Gold SNB Monogram (Transparent Alpha Cutout) */}
           <a
             href="#overview"
+            aria-label={`${PROFILE.name} — Back to top`}
             onClick={(e) => {
               e.preventDefault();
               handleNavSelect('overview');
             }}
-            className="font-display text-sm sm:text-base xl:text-[1.0625rem] font-bold tracking-[-0.02em] text-slate-900 dark:text-[#f1f5f9] hover:text-[#1d4ed8] dark:hover:text-white transition-colors whitespace-nowrap truncate max-w-[215px] sm:max-w-[260px] lg:max-w-[215px] xl:max-w-none shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1d63ff] rounded"
+            className="group inline-flex items-center shrink-0 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1d63ff] rounded-md"
           >
-            {PROFILE.shortName}
+            <img
+              src="/assets/snb-monogram-transparent.png"
+              alt="SNB Monogram — Shankar Narayan Bhattacharjee"
+              className="h-9 sm:h-10 w-auto object-contain drop-shadow-[0_1px_2px_rgba(20,16,10,0.16)] transition-transform duration-200 group-hover:scale-[1.04]"
+            />
           </a>
 
           {/* Zone 2: Desktop Liquid Glass Navigation Pill */}
@@ -108,39 +108,14 @@ export function Navbar({
                 const target = NAV_SECTIONS[index];
                 if (target) handleNavSelect(target.id);
               }}
-              tone={isDark ? 'dark' : 'light'}
+              tone="light"
               compact={false}
               ariaLabel="Primary navigation"
             />
           </div>
 
-          {/* Zone 3: Theme Toggle, Primary Action & Mobile Hamburger */}
+          {/* Zone 3: Primary Action & Mobile Hamburger */}
           <div className="flex items-center gap-3 shrink-0">
-            <div
-              className="hidden md:inline-flex items-center gap-1.5 shrink-0"
-              title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
-            >
-              <Sun
-                className={`h-4 w-4 transition-colors ${
-                  !isDark ? 'text-amber-600' : 'text-slate-500'
-                }`}
-                aria-hidden="true"
-              />
-              <LiquidGlassSwitch
-                checked={isDark}
-                onCheckedChange={onToggleDark}
-                label=""
-                description=""
-                ariaLabel="Toggle dark mode"
-              />
-              <Moon
-                className={`h-4 w-4 transition-colors ${
-                  isDark ? 'text-[#7bd0ff]' : 'text-slate-400'
-                }`}
-                aria-hidden="true"
-              />
-            </div>
-
             <div className="hidden sm:inline-flex shrink-0">
               <ArrowFillButton
                 btnText="View Resume"
@@ -148,9 +123,9 @@ export function Navbar({
                 size="navbar"
                 bgColor="#1d63ff"
                 textColor="#ffffff"
-                fillBgColor={isDark ? '#f8fafc' : '#ffffff'}
+                fillBgColor="#ffffff"
                 fillTextColor="#1d63ff"
-                hoverFillBgColor={isDark ? '#f8fafc' : '#ffffff'}
+                hoverFillBgColor="#ffffff"
                 hoverFillTextColor="#1d63ff"
                 arrowColor="#1d63ff"
                 hoverArrowColor="#1d63ff"
@@ -255,19 +230,6 @@ export function Navbar({
                     );
                   })}
                 </div>
-
-                {/* Appearance Switcher inside drawer */}
-                <div className="mt-6 rounded-xl border border-slate-200 dark:border-white/[0.08] bg-slate-50 dark:bg-[#10131a] p-4">
-                  <LiquidGlassSwitch
-                    checked={isDark}
-                    onCheckedChange={onToggleDark}
-                    label={isDark ? 'Dark Mode' : 'Light Mode'}
-                    description={
-                      isDark ? 'Switch to light interface' : 'Switch to dark interface'
-                    }
-                    ariaLabel="Toggle dark mode"
-                  />
-                </div>
               </nav>
 
               {/* Drawer Footer CTA */}
@@ -278,9 +240,9 @@ export function Navbar({
                   size="drawer"
                   bgColor="#1d63ff"
                   textColor="#ffffff"
-                  fillBgColor={isDark ? '#f8fafc' : '#ffffff'}
+                  fillBgColor="#ffffff"
                   fillTextColor="#1d63ff"
-                  hoverFillBgColor={isDark ? '#f8fafc' : '#ffffff'}
+                  hoverFillBgColor="#ffffff"
                   hoverFillTextColor="#1d63ff"
                   arrowColor="#1d63ff"
                   hoverArrowColor="#1d63ff"

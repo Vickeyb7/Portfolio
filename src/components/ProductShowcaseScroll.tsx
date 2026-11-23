@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { ArrowUpRight, Award } from 'lucide-react';
 import { CASE_STUDIES, CaseStudy } from '../data/portfolioData';
 import { ContainerScroll } from './ui/container-scroll-animation';
+import { EditorialSheet } from './ui/editorial-sheet';
+import { PenAnnotation, ZigZagToSwooshUnderline } from './ui/pen-annotations';
 import { ResilientImage } from './ResilientImage';
 
 interface ProductShowcaseScrollProps {
@@ -15,29 +17,45 @@ export function ProductShowcaseScroll({
   const currentStudy = CASE_STUDIES[selectedIndex];
 
   return (
-    <section
-      aria-label="Interactive product showcase"
-      className="overflow-hidden border-t border-slate-200/80 dark:border-white/[0.06]"
-    >
-      <ContainerScroll
-        titleComponent={
-          <div className="space-y-3">
-            <p className="font-display text-xs font-semibold tracking-[0.04em] text-[#0369a1] dark:text-[#38bdf8]">
-              Interactive Product Spotlight
-            </p>
-            <h2
-              className="font-display text-3xl sm:text-4xl md:text-[3.25rem] md:leading-[3.75rem] font-extrabold tracking-[-0.025em] text-slate-950 dark:text-[#f1f5f9]"
-              style={{ textWrap: 'balance' }}
-            >
-              From Enterprise Discovery to
-              <span className="block mt-1 text-[#1d63ff] dark:text-[#b5c4ff]">
-                Shipped Product Architecture
-              </span>
-            </h2>
-          </div>
-        }
+    <section aria-label="Interactive product showcase">
+      <EditorialSheet
+        tone="night"
+        sheetNumber="02"
+        sheetLabel="Product Spotlight"
       >
-        <div className="flex h-full flex-col bg-white dark:bg-[#0b0e15]">
+        <ContainerScroll
+          surface="night"
+          titleComponent={
+            <div className="space-y-3">
+              <div className="flex flex-wrap items-center justify-center gap-3">
+                <p className="font-display text-xs font-semibold tracking-[0.04em] pen-ink-text">
+                  Interactive Product Spotlight
+                </p>
+                <PenAnnotation
+                  text="switch tabs for live PRD specs"
+                  arrow="down-right"
+                  tilt="rotate-2"
+                  className="hidden sm:inline-flex"
+                />
+              </div>
+              <h2
+                className="font-display text-3xl sm:text-4xl md:text-[3.25rem] md:leading-[3.75rem] font-extrabold tracking-[-0.025em] text-slate-950 dark:text-[#f1f5f9]"
+                style={{ textWrap: 'balance' }}
+              >
+                From Enterprise Discovery to
+                <span className="block mt-1 text-[#1d63ff] dark:text-[#b5c4ff]">
+                  Shipped Product Architecture
+                </span>
+              </h2>
+              <ZigZagToSwooshUnderline
+                align="center"
+                widthClassName="w-52 sm:w-64"
+                className="pt-1"
+              />
+            </div>
+          }
+        >
+          <div className="flex h-full flex-col bg-white dark:bg-[#0b0e15]">
           {/* Interactive top switcher bar inside the showcase viewport */}
           <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 dark:border-white/[0.08] bg-slate-50 dark:bg-[#10131a] px-4 py-3 sm:px-6">
             <div
@@ -159,6 +177,7 @@ export function ProductShowcaseScroll({
           </div>
         </div>
       </ContainerScroll>
+      </EditorialSheet>
     </section>
   );
 }

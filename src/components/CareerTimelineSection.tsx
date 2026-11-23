@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { Award, ChevronDown, ChevronUp } from 'lucide-react';
 import { TIMELINE_MILESTONES } from '../data/portfolioData';
 import { ContainerScroll } from './ui/container-scroll-animation';
+import { EditorialSheet } from './ui/editorial-sheet';
+import { PenAnnotation, ZigZagToSwooshUnderline } from './ui/pen-annotations';
 
 type TimelineTrackFilter = 'all' | 'product' | 'sales';
 
@@ -24,31 +26,47 @@ export function CareerTimelineSection() {
   };
 
   return (
-    <section
-      aria-label="Experience"
-      className="overflow-hidden border-t border-slate-200/80 dark:border-white/[0.06]"
-    >
-      <ContainerScroll
-        variant="section"
-        titleComponent={
-          <div className="space-y-3">
-            <p className="font-display text-xs font-semibold tracking-[0.04em] text-[#0369a1] dark:text-[#38bdf8]">
-              Career Progression &amp; Honors
-            </p>
-            <h2
-              className="font-display text-[1.9rem] leading-[2.35rem] font-extrabold tracking-[-0.025em] text-slate-950 dark:text-[#f1f5f9] md:text-[2.75rem] md:leading-[3.2rem]"
-              style={{ textWrap: 'balance' }}
-            >
-              Enterprise Sales Rigor Meets Product Craft
-            </h2>
-            <p className="mx-auto max-w-2xl text-base leading-[1.6] text-slate-600 dark:text-[#94a3b8]">
-              Dual-track milestone rail highlighting enterprise execution across
-              BrowserStack &amp; Razorpay alongside product fellowship honors at NextLeap.
-            </p>
-          </div>
-        }
+    <section aria-label="Experience">
+      <EditorialSheet
+        tone="night"
+        sheetNumber="04"
+        sheetLabel="Career Ledger"
       >
-        <div className="p-5 sm:p-7 md:p-9 lg:p-10">
+        <ContainerScroll
+          variant="section"
+          surface="night"
+          titleComponent={
+            <div className="space-y-3">
+              <div className="flex flex-wrap items-center justify-center gap-3">
+                <p className="font-display text-xs font-semibold tracking-[0.04em] pen-ink-text">
+                  Career Progression &amp; Honors
+                </p>
+                <PenAnnotation
+                  text="Top 1% cohort · 142% avg quota"
+                  arrow="right-loop"
+                  tilt="rotate-1"
+                  className="hidden sm:inline-flex"
+                />
+              </div>
+              <h2
+                className="font-display text-[1.9rem] leading-[2.35rem] font-extrabold tracking-[-0.025em] text-slate-950 dark:text-[#f1f5f9] md:text-[2.75rem] md:leading-[3.2rem]"
+                style={{ textWrap: 'balance' }}
+              >
+                Enterprise Sales Rigor Meets Product Craft
+              </h2>
+              <ZigZagToSwooshUnderline
+                align="center"
+                widthClassName="w-48 sm:w-60"
+                className="pt-0.5"
+              />
+              <p className="mx-auto max-w-2xl text-base leading-[1.6] text-slate-600 dark:text-[#94a3b8]">
+                Dual-track milestone rail highlighting enterprise execution across
+                BrowserStack &amp; Razorpay alongside product fellowship honors at NextLeap.
+              </p>
+            </div>
+          }
+        >
+          <div className="p-5 sm:p-7 md:p-9 lg:p-10">
           {/* Dual-Track Filter & Legend Toolbar */}
           <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
             <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-slate-600 dark:text-[#94a3b8]">
@@ -251,6 +269,7 @@ export function CareerTimelineSection() {
           </div>
         </div>
       </ContainerScroll>
+      </EditorialSheet>
     </section>
   );
 }

@@ -11,6 +11,8 @@ import {
   useState,
 } from 'react';
 import { motion, MotionConfig, useInView, useReducedMotion } from 'motion/react';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Navbar } from './components/Navbar';
 import { CoverSection } from './components/CoverSection';
 import { HeroSection } from './components/HeroSection';
@@ -24,6 +26,8 @@ import {
   PROFILE,
   SectionId,
 } from './data/portfolioData';
+
+gsap.registerPlugin(ScrollTrigger);
 
 /**
  * Wraps dynamic ES module imports with export verification and diagnostic error
@@ -85,11 +89,17 @@ const loadCapabilities = createLazyLoader(
   () => import('./components/CapabilitiesAndProofSection'),
   (m) => m.CapabilitiesAndProofSection
 );
-const loadContact = createLazyLoader(
-  'ContactSection',
-  './components/ContactSection',
-  () => import('./components/ContactSection'),
-  (m) => m.ContactSection
+const loadFunFacts = createLazyLoader(
+  'FunFactsSection',
+  './components/FunFactsSection',
+  () => import('./components/FunFactsSection'),
+  (m) => m.FunFactsSection
+);
+const loadThankYou = createLazyLoader(
+  'ThankYouSection',
+  './components/ThankYouSection',
+  () => import('./components/ThankYouSection'),
+  (m) => m.ThankYouSection
 );
 const loadCaseStudyModal = createLazyLoader(
   'CaseStudyModal',
@@ -108,7 +118,8 @@ const ProductShowcaseScroll = lazy(loadProductShowcase);
 const CaseStudiesSection = lazy(loadCaseStudies);
 const CareerTimelineSection = lazy(loadCareerTimeline);
 const CapabilitiesAndProofSection = lazy(loadCapabilities);
-const ContactSection = lazy(loadContact);
+const FunFactsSection = lazy(loadFunFacts);
+const ThankYouSection = lazy(loadThankYou);
 const CaseStudyModal = lazy(loadCaseStudyModal);
 const ResumeDrawer = lazy(loadResumeDrawer);
 
@@ -294,13 +305,6 @@ function SectionSkeleton({ label }: { label: string }) {
 }
 
 export default function App() {
-  const [isDark, setIsDark] = useState<boolean>(() => {
-    try {
-      return localStorage.getItem('portfolio-theme') === 'dark';
-    } catch {
-      return false;
-    }
-  });
   const [activeSection, setActiveSection] = useState<SectionId>('overview');
   const [revealedSections, setRevealedSections] = useState<
     Partial<Record<SectionId, boolean>>
@@ -384,7 +388,8 @@ export default function App() {
         loadCaseStudies,
         loadCareerTimeline,
         loadCapabilities,
-        loadContact,
+        loadFunFacts,
+        loadThankYou,
       ];
       loaders.forEach((load) => {
         void load().catch(() => {
@@ -396,14 +401,13 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    const root = document.documentElement;
-    root.classList.toggle('dark', isDark);
+    document.documentElement.classList.remove('dark');
     try {
-      localStorage.setItem('portfolio-theme', isDark ? 'dark' : 'light');
+      localStorage.removeItem('portfolio-theme');
     } catch {
       // ignore storage errors in restricted iframes
     }
-  }, [isDark]);
+  }, []);
 
   // Unified scroll-to-section handler measuring live sticky navbar height & verified anchor refs
   const scrollToSection = useCallback(
@@ -502,10 +506,19 @@ export default function App() {
     window.addEventListener('wheel', releaseScrollLock, { passive: true });
     window.addEventListener('touchstart', releaseScrollLock, { passive: true });
 
-    // Re-sync scroll-spy (and re-align an in-flight nav jump) when lazy sections change page height
+    // Re-sync scroll-spy, pending nav jumps, and GSAP ScrollTrigger positions when lazy sections change page height
     let resizeObserver: ResizeObserver | null = null;
+    let refreshTimer: number | null = null;
     if (typeof ResizeObserver !== 'undefined' && mainRef.current) {
       resizeObserver = new ResizeObserver(() => {
+        if (refreshTimer !== null) {
+          window.clearTimeout(refreshTimer);
+        }
+        refreshTimer = window.setTimeout(() => {
+          ScrollTrigger.refresh();
+          refreshTimer = null;
+        }, 120);
+
         const pendingId = pendingScrollTargetRef.current;
         if (
           pendingId &&
@@ -535,6 +548,9 @@ export default function App() {
       window.removeEventListener('wheel', releaseScrollLock);
       window.removeEventListener('touchstart', releaseScrollLock);
       resizeObserver?.disconnect();
+      if (refreshTimer !== null) {
+        window.clearTimeout(refreshTimer);
+      }
     };
   }, [resolveSectionElement]);
 
@@ -554,19 +570,17 @@ export default function App() {
 
   return (
     <MotionConfig reducedMotion="user">
-      <div className="min-h-screen bg-[#f8fafc] text-[#0f172a] dark:bg-[#0a0d14] dark:text-[#e1e2ec] transition-colors duration-200">
+      <div className="min-h-screen bg-[#ebe6dc] text-[#16181f] dark:bg-[#080a0f] dark:text-[#e4e6f0] transition-colors duration-200">
         <SectionSeoHead
           activeSection={activeSection}
           activeCaseStudy={activeCaseStudy}
           resumeOpen={resumeOpen}
-          isDark={isDark}
+          isDark={false}
         />
-        <ScrollProgressBar isDark={isDark} />
-        <MagneticCursor isDark={isDark} />
+        <ScrollProgressBar isDark={false} />
+        <MagneticCursor isDark={false} />
 
         <Navbar
-          isDark={isDark}
-          onToggleDark={setIsDark}
           activeSection={activeSection}
           onNavigate={scrollToSection}
           onOpenResume={() => setResumeOpen(true)}
@@ -579,7 +593,7 @@ export default function App() {
             ref={registerSectionRef('overview')}
             className="scroll-mt-[76px]"
           >
-            <CoverSection isDark={isDark} onExploreBelow={scrollToHero} />
+            <CoverSection isDark={false} onExploreBelow={scrollToHero} />
 
             <div ref={heroAnchorRef} className="scroll-mt-[76px]">
               <SectionReveal forceVisible={!!revealedSections.overview} delay={0.04}>
@@ -652,66 +666,34 @@ export default function App() {
             </SectionReveal>
           </div>
 
+          <SectionReveal delay={0.04}>
+            <SectionErrorBoundary label="fun facts">
+              <Suspense fallback={<SectionSkeleton label="fun facts" />}>
+                <FunFactsSection />
+              </Suspense>
+            </SectionErrorBoundary>
+          </SectionReveal>
+
           <div
             id="contact"
             ref={registerSectionRef('contact')}
             className="scroll-mt-[76px]"
           >
             <SectionReveal forceVisible={!!revealedSections.contact} delay={0.04}>
-              <SectionErrorBoundary label="contact">
-                <Suspense fallback={<SectionSkeleton label="contact form" />}>
-                  <ContactSection
+              <SectionErrorBoundary label="thank you closing sheet">
+                <Suspense fallback={<SectionSkeleton label="closing sheet" />}>
+                  <ThankYouSection
                     prefilledTopic={prefilledTopic}
                     onClearPrefilledTopic={() => setPrefilledTopic(null)}
                     onOpenResume={() => setResumeOpen(true)}
+                    onJumpToCaseStudies={() => scrollToSection('case-studies')}
+                    onBackToTop={() => scrollToSection('overview')}
                   />
                 </Suspense>
               </SectionErrorBoundary>
             </SectionReveal>
           </div>
         </main>
-
-        {/* Quiet Editorial Footer */}
-        <footer className="no-print border-t border-slate-200 bg-white dark:border-white/[0.08] dark:bg-[#06080d] py-10 transition-colors duration-200">
-          <div className="mx-auto flex max-w-[1280px] flex-col gap-4 px-5 text-xs text-slate-600 dark:text-[#8d90a2] sm:flex-row sm:items-center sm:justify-between md:px-8 lg:px-12">
-            <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
-              <span className="font-display font-semibold text-slate-900 dark:text-[#e1e2ec]">
-                {PROFILE.name}
-              </span>
-              <span aria-hidden="true" className="text-slate-300 dark:text-white/20">
-                ·
-              </span>
-              <span>{PROFILE.role}</span>
-              <span aria-hidden="true" className="text-slate-300 dark:text-white/20">
-                ·
-              </span>
-              <span>{PROFILE.location}</span>
-            </div>
-
-            <div className="flex flex-wrap items-center gap-5">
-              <button
-                type="button"
-                onClick={() => scrollToSection('overview')}
-                className="hover:text-slate-950 dark:hover:text-[#f1f5f9] transition-colors cursor-pointer"
-              >
-                Back to Top
-              </button>
-              <button
-                type="button"
-                onClick={() => setResumeOpen(true)}
-                className="hover:text-slate-950 dark:hover:text-[#f1f5f9] transition-colors cursor-pointer"
-              >
-                Printable CV
-              </button>
-              <a
-                href={`mailto:${PROFILE.email}`}
-                className="hover:text-slate-950 dark:hover:text-[#f1f5f9] transition-colors"
-              >
-                {PROFILE.email}
-              </a>
-            </div>
-          </div>
-        </footer>
 
         {/* On-demand code-split interactive overlays */}
         {activeCaseStudy && (

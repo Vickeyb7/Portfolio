@@ -1,15 +1,18 @@
 @import "tailwindcss";
-@custom-variant dark (&:where(.dark, .dark *));
+@custom-variant dark (&:where([data-sheet="night"], [data-sheet="night"] *, .dark:not([data-sheet="paper"]), .dark *:not([data-sheet="paper"], [data-sheet="paper"] *)));
 
 @theme {
   --font-display: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, sans-serif;
   --font-serif: "Cormorant Garamond", Georgia, "Times New Roman", serif;
+  --font-hand: "Caveat", "Cormorant Garamond", cursive;
   --font-sans: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
 }
 
 :root {
   color-scheme: light;
+  --pen-ink-paper: #4f6df5;
+  --pen-ink-night: #8aa2ff;
 }
 
 html.dark {
@@ -17,32 +20,59 @@ html.dark {
 }
 
 html {
-  background-color: #f8fafc;
-  color: #0f172a;
+  background-color: #ebe6dc;
+  color: #16181f;
   font-family: var(--font-sans);
   scroll-padding-top: 76px;
 }
 
 html.dark {
-  background-color: #0a0d14;
-  color: #e1e2ec;
+  background-color: #080a0f;
+  color: #e4e6f0;
 }
 
 body {
-  background-color: #f8fafc;
+  background-color: #ebe6dc;
   background-image:
-    radial-gradient(60% 38% at 12% 0%, rgba(29, 99, 255, 0.055) 0%, rgba(248, 250, 252, 0) 68%),
-    radial-gradient(45% 32% at 90% 8%, rgba(217, 119, 6, 0.045) 0%, rgba(248, 250, 252, 0) 68%);
+    radial-gradient(60% 38% at 12% 0%, rgba(79, 109, 245, 0.055) 0%, rgba(235, 230, 220, 0) 68%),
+    radial-gradient(45% 32% at 90% 8%, rgba(180, 130, 62, 0.055) 0%, rgba(235, 230, 220, 0) 68%);
   background-attachment: fixed;
   overflow-x: clip;
   transition: background-color 220ms ease, color 220ms ease;
 }
 
 html.dark body {
-  background-color: #0a0d14;
+  background-color: #080a0f;
   background-image:
-    radial-gradient(60% 40% at 15% 0%, rgba(29, 99, 255, 0.09) 0%, rgba(10, 13, 20, 0) 70%),
-    radial-gradient(45% 35% at 88% 12%, rgba(56, 189, 248, 0.05) 0%, rgba(10, 13, 20, 0) 70%);
+    radial-gradient(60% 40% at 15% 0%, rgba(79, 109, 245, 0.09) 0%, rgba(8, 10, 15, 0) 70%),
+    radial-gradient(45% 35% at 88% 12%, rgba(138, 162, 255, 0.055) 0%, rgba(8, 10, 15, 0) 70%);
+}
+
+/* Alternating Archival Paper & Charcoal Night Editorial Sheets */
+.editorial-sheet-paper {
+  background-color: #f6f1e7;
+  background-image:
+    radial-gradient(120% 70% at 14% 0%, rgba(255, 252, 244, 0.92) 0%, rgba(246, 241, 231, 0) 58%),
+    radial-gradient(90% 55% at 88% 100%, rgba(226, 217, 200, 0.42) 0%, rgba(246, 241, 231, 0) 65%);
+  color: #16181f;
+  --pen-ink: #4f6df5;
+}
+
+.editorial-sheet-night {
+  background-color: #141720;
+  background-image:
+    radial-gradient(110% 65% at 18% 0%, rgba(79, 109, 245, 0.11) 0%, rgba(20, 23, 32, 0) 56%),
+    radial-gradient(90% 60% at 85% 96%, rgba(138, 162, 255, 0.075) 0%, rgba(20, 23, 32, 0) 62%);
+  color: #e6e8f2;
+  --pen-ink: #8aa2ff;
+}
+
+.pen-ink-text {
+  color: var(--pen-ink, #4f6df5);
+}
+
+.font-hand {
+  font-family: var(--font-hand);
 }
 
 h1,
@@ -76,7 +106,8 @@ h4,
     0 10px 24px -8px rgba(29, 99, 255, 0.45);
 }
 
-html.dark .btn-primary-electric:hover {
+html.dark .btn-primary-electric:hover,
+[data-sheet="night"] .btn-primary-electric:hover {
   background-color: #256bff;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.3),
@@ -87,7 +118,7 @@ html.dark .btn-primary-electric:hover {
   transform: translateY(1px);
 }
 
-/* Elevation 1 & 2 surfaces (Light + Dark) */
+/* Elevation 1 & 2 surfaces (Light, Dark, Archival Paper, Charcoal Night) */
 .surface-card {
   background-color: #ffffff;
   border: 1px solid rgba(15, 23, 42, 0.09);
@@ -102,21 +133,40 @@ html.dark .surface-card {
   border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
+[data-sheet="paper"] .surface-card {
+  background-color: #fdfbf6;
+  border: 1px solid rgba(46, 39, 29, 0.11);
+}
+
+[data-sheet="night"] .surface-card {
+  background-color: rgba(24, 28, 39, 0.88);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+}
+
 .surface-card-interactive:hover {
   transform: translateY(-2px);
   background-color: #ffffff;
-  border-color: rgba(29, 99, 255, 0.32);
+  border-color: rgba(79, 109, 245, 0.36);
   box-shadow:
     0 16px 36px -18px rgba(15, 23, 42, 0.16),
-    0 0 0 1px rgba(29, 99, 255, 0.12);
+    0 0 0 1px rgba(79, 109, 245, 0.14);
 }
 
-html.dark .surface-card-interactive:hover {
-  background-color: rgba(26, 36, 56, 0.85);
-  border-color: rgba(29, 99, 255, 0.3);
+html.dark .surface-card-interactive:hover,
+[data-sheet="night"] .surface-card-interactive:hover {
+  background-color: rgba(31, 37, 52, 0.94);
+  border-color: rgba(138, 162, 255, 0.34);
   box-shadow:
-    0 20px 40px -20px rgba(0, 0, 0, 0.7),
-    0 0 0 1px rgba(29, 99, 255, 0.14);
+    0 20px 40px -20px rgba(0, 0, 0, 0.72),
+    0 0 0 1px rgba(138, 162, 255, 0.16);
+}
+
+[data-sheet="paper"] .surface-card-interactive:hover {
+  background-color: #fffdf9;
+  border-color: rgba(79, 109, 245, 0.38);
+  box-shadow:
+    0 16px 36px -18px rgba(42, 34, 22, 0.16),
+    0 0 0 1px rgba(79, 109, 245, 0.14);
 }
 
 /* Elevation 3 modal overlay (Light + Dark) */
@@ -136,7 +186,7 @@ html.dark .surface-modal {
     0 0 0 1px rgba(255, 255, 255, 0.12);
 }
 
-/* Recessed input field (Light + Dark) */
+/* Recessed input field (Light, Dark, Paper, Night) */
 .recessed-input {
   background-color: #f8fafc;
   border: 1px solid #cbd5e1;
@@ -146,34 +196,56 @@ html.dark .surface-modal {
 .recessed-input:focus {
   outline: none;
   background-color: #ffffff;
-  border-color: #1d63ff;
-  box-shadow: 0 0 0 3px rgba(29, 99, 255, 0.15);
+  border-color: #4f6df5;
+  box-shadow: 0 0 0 3px rgba(79, 109, 245, 0.15);
 }
 
-html.dark .recessed-input {
-  background-color: rgba(6, 8, 13, 0.8);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+html.dark .recessed-input,
+[data-sheet="night"] .recessed-input {
+  background-color: rgba(10, 12, 19, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.11);
 }
 
-html.dark .recessed-input:focus {
-  background-color: rgba(6, 8, 13, 0.92);
-  border-color: #1d63ff;
-  box-shadow: 0 0 0 3px rgba(29, 99, 255, 0.18);
+html.dark .recessed-input:focus,
+[data-sheet="night"] .recessed-input:focus {
+  background-color: rgba(10, 12, 19, 0.96);
+  border-color: #8aa2ff;
+  box-shadow: 0 0 0 3px rgba(138, 162, 255, 0.18);
 }
 
-/* Corner luminescence (Light + Dark) */
+[data-sheet="paper"] .recessed-input {
+  background-color: #f4eee2;
+  border: 1px solid rgba(46, 39, 29, 0.18);
+}
+
+[data-sheet="paper"] .recessed-input:focus {
+  background-color: #fffdf8;
+  border-color: #4f6df5;
+  box-shadow: 0 0 0 3px rgba(79, 109, 245, 0.15);
+}
+
+/* Corner luminescence (Light, Dark, Paper, Night) */
 .glow-cobalt-corner {
   background-image: radial-gradient(
     380px circle at 100% 0%,
-    rgba(29, 99, 255, 0.055),
+    rgba(79, 109, 245, 0.06),
     transparent 65%
   );
 }
 
-html.dark .glow-cobalt-corner {
+html.dark .glow-cobalt-corner,
+[data-sheet="night"] .glow-cobalt-corner {
   background-image: radial-gradient(
     420px circle at 100% 0%,
-    rgba(29, 99, 255, 0.12),
+    rgba(138, 162, 255, 0.13),
+    transparent 65%
+  );
+}
+
+[data-sheet="paper"] .glow-cobalt-corner {
+  background-image: radial-gradient(
+    380px circle at 100% 0%,
+    rgba(79, 109, 245, 0.065),
     transparent 65%
   );
 }
@@ -186,10 +258,19 @@ html.dark .glow-cobalt-corner {
   );
 }
 
-html.dark .glow-champagne-corner {
+html.dark .glow-champagne-corner,
+[data-sheet="night"] .glow-champagne-corner {
   background-image: radial-gradient(
     420px circle at 100% 0%,
-    rgba(223, 177, 91, 0.1),
+    rgba(223, 177, 91, 0.11),
+    transparent 65%
+  );
+}
+
+[data-sheet="paper"] .glow-champagne-corner {
+  background-image: radial-gradient(
+    380px circle at 100% 0%,
+    rgba(196, 134, 42, 0.08),
     transparent 65%
   );
 }

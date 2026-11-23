@@ -8,16 +8,19 @@ import {
 } from "motion/react";
 
 export type ContainerScrollVariant = "fixed" | "section" | "hero";
+export type ContainerScrollSurface = "default" | "paper" | "night";
 
 export const ContainerScroll = ({
   titleComponent,
   children,
   variant = "fixed",
+  surface = "default",
   className = "",
 }: {
   titleComponent?: string | React.ReactNode;
   children: React.ReactNode;
   variant?: ContainerScrollVariant;
+  surface?: ContainerScrollSurface;
   className?: string;
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -88,10 +91,10 @@ export const ContainerScroll = ({
     <div
       className={`relative flex items-center justify-center px-4 sm:px-6 md:px-8 lg:px-12 ${
         variant === "hero"
-          ? "pt-6 pb-14 md:pt-10 md:pb-20"
+          ? "pt-4 pb-12 md:pt-7 md:pb-16"
           : variant === "section"
-          ? "py-14 md:py-20 lg:py-24"
-          : "py-12 md:py-20"
+          ? "pt-8 pb-14 md:pt-12 md:pb-20 lg:pb-24"
+          : "pt-8 pb-14 md:pt-12 md:pb-20"
       } ${className}`}
       ref={containerRef}
     >
@@ -111,6 +114,7 @@ export const ContainerScroll = ({
           scale={scale}
           opacity={opacity}
           variant={variant}
+          surface={surface}
         >
           {children}
         </Card>
@@ -143,6 +147,7 @@ export const Card = ({
   scale,
   opacity,
   variant = "fixed",
+  surface = "default",
   children,
 }: {
   rotate: MotionValue<number>;
@@ -150,10 +155,32 @@ export const Card = ({
   translate: MotionValue<number>;
   opacity?: MotionValue<number>;
   variant?: ContainerScrollVariant;
+  surface?: ContainerScrollSurface;
   children: React.ReactNode;
 }) => {
   const isFixed = variant === "fixed";
   const isHero = variant === "hero";
+
+  const frameClass =
+    surface === "paper"
+      ? "border-[#dcd3c4] bg-[#ece5d7]/85"
+      : surface === "night"
+      ? "border-white/[0.11] bg-[#1c202c]/88"
+      : "border-slate-300/90 dark:border-[#32353d] bg-slate-200/85 dark:bg-[#191b23]";
+
+  const innerClass =
+    surface === "paper"
+      ? "bg-[#fcfaf4] border-[#ded6c8]"
+      : surface === "night"
+      ? "bg-[#10131c] border-white/[0.08]"
+      : "bg-white dark:bg-[#0b0e15] border-slate-200/90 dark:border-white/[0.08]";
+
+  const frameShadow =
+    surface === "night"
+      ? "0 0 #00000044, 0 12px 28px rgba(0, 0, 0, 0.45), 0 36px 52px rgba(0, 0, 0, 0.35)"
+      : surface === "paper"
+      ? "0 0 #0000001a, 0 10px 24px rgba(45, 36, 22, 0.08), 0 30px 44px rgba(45, 36, 22, 0.07)"
+      : "0 0 #00000033, 0 9px 20px rgba(15, 23, 42, 0.14), 0 32px 36px rgba(15, 23, 42, 0.11), 0 72px 48px rgba(15, 23, 42, 0.06)";
 
   return (
     <motion.div
@@ -163,10 +190,9 @@ export const Card = ({
         opacity,
         transformOrigin: isHero ? "50% 100%" : "50% 0%",
         willChange: "transform",
-        boxShadow:
-          "0 0 #00000033, 0 9px 20px rgba(15, 23, 42, 0.14), 0 32px 36px rgba(15, 23, 42, 0.11), 0 72px 48px rgba(15, 23, 42, 0.06)",
+        boxShadow: frameShadow,
       }}
-      className={`mx-auto w-full rounded-[28px] border-[3px] sm:border-[4px] border-slate-300/90 dark:border-[#32353d] bg-slate-200/85 dark:bg-[#191b23] p-2 sm:p-3.5 md:p-4 ${
+      className={`mx-auto w-full rounded-[28px] border-[2px] sm:border-[3px] p-2 sm:p-3 md:p-3.5 ${frameClass} ${
         isFixed
           ? "mt-6 md:mt-8 h-[32rem] sm:h-[36rem] md:h-[42rem] max-w-5xl"
           : isHero
@@ -175,7 +201,7 @@ export const Card = ({
       }`}
     >
       <div
-        className={`w-full overflow-hidden rounded-2xl bg-white dark:bg-[#0b0e15] border border-slate-200/90 dark:border-white/[0.08] ${
+        className={`w-full overflow-hidden rounded-2xl border ${innerClass} ${
           isFixed ? "h-full" : ""
         }`}
       >
