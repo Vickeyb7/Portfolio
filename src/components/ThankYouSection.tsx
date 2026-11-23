@@ -19,8 +19,12 @@ interface ThankYouSectionProps {
 
 const CLOSING_PARAGRAPHS = [
   'Dear Reader,',
-  'Thank you for scrolling through these sheets. Product management rarely photographs cleanly—most of the real work happens in awkward customer discovery calls, pruned backlogs, and trade-offs debated on a whiteboard at 4 PM.',
-  "If you're building a high-trust product team that values crisp thinking, honest metrics, and shipping things customers actually miss when they're gone, I'd love to compare notes over coffee or a 20-minute call.",
+  'Thank you for spending a little time here.',
+  "My product journey has been shaped by years of conversations with customers, understanding business challenges, and learning that sometimes the most interesting problems aren't the ones people explicitly talk about.",
+  "Moving from technology sales to studying product management has changed the way I look at technology. I'm increasingly fascinated by the space between what people need, what businesses envision, and what we can actually build.",
+  'I believe great products come from curiosity, thoughtful questions, a willingness to challenge assumptions, and the courage to turn ideas into something real.',
+  "If you're building something interesting, exploring an ambitious idea, or simply enjoy conversations about products, technology and the problems worth solving, I'd love to connect.",
+  'Until then, keep building things that matter.',
   'Warmly,',
 ];
 
@@ -152,7 +156,9 @@ export function ThankYouSection({
         });
 
         paraNodes.forEach((node, idx) => {
-          const dur = idx === 0 || idx === paraNodes.length - 1 ? 0.55 : 0.95;
+          const isShortLine =
+            idx === 0 || idx === 1 || idx >= paraNodes.length - 2;
+          const dur = isShortLine ? 0.42 : 0.7;
           letterTl.to(
             node,
             {
@@ -162,7 +168,7 @@ export function ThankYouSection({
               duration: dur,
               ease: 'power2.out',
             },
-            idx === 0 ? 0 : '>-0.18'
+            idx === 0 ? 0 : '>-0.22'
           );
         });
 
@@ -408,24 +414,22 @@ export function ThankYouSection({
 
             {/* Right Column: Paragraph-by-Paragraph Handwritten Closing Letter & Signature */}
             <div className="flex flex-col justify-between lg:col-span-7 lg:border-l lg:border-[#2a2319]/12 lg:pl-12">
-              <div ref={letterRef} className="space-y-6">
+              <div ref={letterRef} className="space-y-4 sm:space-y-5">
                 {CLOSING_PARAGRAPHS.map((paragraph, idx) => (
                   <p
                     key={idx}
                     data-letter-para
-                    className="font-hand text-[1.45rem] sm:text-[1.72rem] leading-[1.48] font-medium tracking-[0.005em] text-[#171923]"
+                    className="font-hand text-[1.35rem] sm:text-[1.54rem] leading-[1.46] font-medium tracking-[0.005em] text-[#171923]"
                   >
-                    <span className="bg-[#4f6df5]/[0.15] px-1.5 py-0.5 [box-decoration-break:clone] [-webkit-box-decoration-break:clone]">
-                      {paragraph}
-                    </span>
+                    {paragraph}
                   </p>
                 ))}
 
                 {/* Handwritten Periwinkle-Cobalt Closing Signature */}
-                <div data-letter-signature className="pt-2">
+                <div data-letter-signature className="pt-1">
                   <div className="inline-block">
-                    <span className="bg-[#4f6df5]/[0.16] px-2 py-0.5 font-hand text-[2.25rem] sm:text-[2.65rem] leading-none font-bold tracking-[-0.01em] text-[#4f6df5]">
-                      {PROFILE.firstName} Bhattacharjee
+                    <span className="font-hand text-[2.05rem] sm:text-[2.45rem] leading-tight font-bold tracking-[-0.01em] text-[#4f6df5]">
+                      {PROFILE.name}
                     </span>
                     <svg
                       ref={signatureSvgRef}
@@ -433,7 +437,7 @@ export function ThankYouSection({
                       fill="none"
                       xmlns="http://www.w3.org/2000/svg"
                       aria-hidden="true"
-                      className="mt-1 h-5 w-52 sm:w-64 overflow-visible text-[#4f6df5]"
+                      className="mt-1 h-5 w-64 sm:w-80 overflow-visible text-[#4f6df5]"
                     >
                       <path
                         d="M 4 15 C 54 6, 138 5, 224 11 C 239 12, 249 10, 255 6"

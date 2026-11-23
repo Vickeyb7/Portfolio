@@ -82,21 +82,26 @@ export function Navbar({
         }`}
       >
         <div className="mx-auto flex h-[72px] max-w-[1280px] items-center justify-between gap-4 xl:gap-6 px-5 md:px-8 lg:px-10 xl:px-12">
-          {/* Zone 1: Custom Champagne Gold SNB Monogram (Transparent Alpha Cutout) */}
+          {/* Zone 1: Custom Champagne Gold SNB Monogram Home Link */}
           <a
             href="#overview"
-            aria-label={`${PROFILE.name} — Back to top`}
+            aria-label="Shankar Narayan Bhattacharjee — Home"
             onClick={(e) => {
               e.preventDefault();
               handleNavSelect('overview');
             }}
             className="group inline-flex items-center shrink-0 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1d63ff] rounded-md"
           >
-            <img
-              src="/assets/snb-monogram-transparent.png"
-              alt="SNB Monogram — Shankar Narayan Bhattacharjee"
-              className="h-9 sm:h-10 w-auto object-contain drop-shadow-[0_1px_2px_rgba(20,16,10,0.16)] transition-transform duration-200 group-hover:scale-[1.04]"
-            />
+            <span className="inline-flex items-center mix-blend-multiply">
+              <img
+                src="/assets/snb-monogram-transparent.png"
+                alt="Shankar Narayan Bhattacharjee personal brand logo"
+                width={841}
+                height={501}
+                decoding="async"
+                className="h-9 sm:h-10 w-auto object-contain transition-transform duration-200 group-hover:scale-[1.04]"
+              />
+            </span>
           </a>
 
           {/* Zone 2: Desktop Liquid Glass Navigation Pill */}
