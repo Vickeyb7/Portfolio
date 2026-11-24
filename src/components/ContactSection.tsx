@@ -253,7 +253,7 @@ export function ContactSection({
                         Request a Case Walkthrough or Coffee Chat
                       </h3>
                       <p className="mt-1 text-xs text-slate-600 dark:text-[#94a3b8]">
-                        Typical response within 24 hours · Bengaluru (IST) / Global Remote
+                        Typical response within 24 hours · Global Remote
                       </p>
                     </div>
 

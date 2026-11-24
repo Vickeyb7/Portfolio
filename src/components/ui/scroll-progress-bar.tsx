@@ -54,19 +54,28 @@ function formatRemainingReadTime(
   totalSeconds: number
 ): { label: string; isComplete: boolean } {
   const clamped = Math.min(1, Math.max(0, progress));
+  const totalMinutes = Math.max(1, Math.round(totalSeconds / 60));
+
+  if (clamped < 0.015) {
+    return {
+      label: `Est. ${totalMinutes} min read`,
+      isComplete: false,
+    };
+  }
+
   const remainingSeconds = Math.max(0, Math.round(totalSeconds * (1 - clamped)));
 
   if (clamped >= 0.96 || remainingSeconds <= 15) {
-    return { label: 'End of folio', isComplete: true };
+    return { label: 'Finished reading', isComplete: true };
   }
 
   if (remainingSeconds < 60) {
-    return { label: '< 1 min left', isComplete: false };
+    return { label: 'Less than 1 min left', isComplete: false };
   }
 
   const remainingMinutes = Math.ceil(remainingSeconds / 60);
   return {
-    label: `${remainingMinutes} min left`,
+    label: `Est. ${remainingMinutes} min left`,
     isComplete: false,
   };
 }
@@ -76,16 +85,14 @@ export function ScrollProgressBar({ isDark }: ScrollProgressBarProps) {
   const { scrollYProgress } = useScroll();
   const [totalSeconds, setTotalSeconds] = useState<number>(FALLBACK_TOTAL_SECONDS);
   const [readout, setReadout] = useState<{
-    visible: boolean;
     label: string;
     percent: number;
     isComplete: boolean;
-  }>({
-    visible: false,
-    label: '4 min left',
+  }>(() => ({
+    label: formatRemainingReadTime(0, FALLBACK_TOTAL_SECONDS).label,
     percent: 0,
     isComplete: false,
-  });
+  }));
 
   const smoothProgress = useSpring(scrollYProgress, {
     stiffness: 260,
@@ -138,36 +145,32 @@ export function ScrollProgressBar({ isDark }: ScrollProgressBarProps) {
     };
   }, []);
 
-  // Dynamically update archival reading time estimate as the user scrolls
+  // Dynamically update archival serif reading time estimate as the user scrolls
   useMotionValueEvent(scrollYProgress, 'change', (latest) => {
-    const visible = latest > 0.015;
     const percent = Math.min(100, Math.max(0, Math.round(latest * 100)));
     const { label, isComplete } = formatRemainingReadTime(latest, totalSeconds);
 
     setReadout((prev) =>
-      prev.visible === visible &&
       prev.label === label &&
       prev.percent === percent &&
       prev.isComplete === isComplete
         ? prev
-        : { visible, label, percent, isComplete }
+        : { label, percent, isComplete }
     );
   });
 
   // Sync formatted label if totalSeconds finishes hydrating while scrolled
   useEffect(() => {
     const latest = scrollYProgress.get();
-    const visible = latest > 0.015;
     const percent = Math.min(100, Math.max(0, Math.round(latest * 100)));
     const { label, isComplete } = formatRemainingReadTime(latest, totalSeconds);
 
     setReadout((prev) =>
-      prev.visible === visible &&
       prev.label === label &&
       prev.percent === percent &&
       prev.isComplete === isComplete
         ? prev
-        : { visible, label, percent, isComplete }
+        : { label, percent, isComplete }
     );
   }, [totalSeconds, scrollYProgress]);
 
@@ -188,53 +191,57 @@ export function ScrollProgressBar({ isDark }: ScrollProgressBarProps) {
         />
       </div>
 
-      {/* Subtle archival folio reading-time marginalia (unboxed editorial slip, zero pill styling) */}
-      <AnimatePresence>
-        {readout.visible && (
-          <motion.aside
-            key="archival-reading-time"
-            aria-label="Estimated reading time remaining"
-            initial={
-              prefersReducedMotion
-                ? { opacity: 0 }
-                : { opacity: 0, y: 8 }
-            }
-            animate={{ opacity: 1, y: 0 }}
-            exit={
-              prefersReducedMotion
-                ? { opacity: 0 }
-                : { opacity: 0, y: 8 }
-            }
-            transition={{ duration: 0.24, ease: [0.16, 1, 0.3, 1] }}
-            className="no-print pointer-events-none fixed right-3 bottom-3 sm:right-5 sm:bottom-4 z-30 select-none"
-          >
-            <div className="relative overflow-hidden border-b border-[#4f6df5]/40 bg-[#f6f1e7]/88 px-2.5 py-1.5 backdrop-blur-md shadow-[0_4px_18px_-8px_rgba(24,20,14,0.22)]">
-              <div className="flex items-center gap-2 text-[11px] leading-none">
-                <span className="font-serif italic text-[13px] text-[#3a3329]">
-                  {readout.label}
-                </span>
-                <span aria-hidden="true" className="text-[#9e9484]">
-                  ·
-                </span>
-                <span
-                  className={`font-mono text-[10px] font-semibold tabular-nums ${
-                    readout.isComplete ? 'text-[#4f6df5]' : 'text-[#5b5346]'
-                  }`}
-                >
-                  {readout.percent}%
-                </span>
-              </div>
+      {/* Subtle archival serif reading-time indicator (unboxed folio slip, zero pill styling) */}
+      <motion.aside
+        aria-label="Estimated reading time"
+        initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0, y: 6 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+        className="no-print pointer-events-none fixed right-3 bottom-3 sm:right-5 sm:bottom-4 z-30 select-none"
+      >
+        <div className="relative overflow-hidden border-t border-b border-[#2a2319]/15 bg-[#f6f1e7]/90 px-3 py-1.5 backdrop-blur-md shadow-[0_6px_20px_-10px_rgba(24,20,14,0.22)]">
+          <div className="flex items-baseline gap-2 leading-none">
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.span
+                key={readout.label}
+                initial={
+                  prefersReducedMotion ? { opacity: 1 } : { opacity: 0, y: 3 }
+                }
+                animate={{ opacity: 1, y: 0 }}
+                exit={
+                  prefersReducedMotion ? { opacity: 1 } : { opacity: 0, y: -3 }
+                }
+                transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
+                className="font-serif italic text-[13.5px] sm:text-[14.5px] font-semibold tracking-[0.015em] text-[#2a241c]"
+              >
+                {readout.label}
+              </motion.span>
+            </AnimatePresence>
 
-              {/* Micro ink rule mirroring live scroll completion */}
-              <motion.div
-                aria-hidden="true"
-                className="absolute inset-x-0 bottom-0 h-[1.5px] origin-left bg-[#4f6df5] will-change-transform"
-                style={{ scaleX: activeProgress }}
-              />
-            </div>
-          </motion.aside>
-        )}
-      </AnimatePresence>
+            <span
+              aria-hidden="true"
+              className="font-serif text-[12px] text-[#9b907f]"
+            >
+              ·
+            </span>
+
+            <span
+              className={`font-serif text-[12.5px] sm:text-[13px] font-medium tabular-nums tracking-[0.02em] ${
+                readout.isComplete ? 'text-[#4f6df5]' : 'text-[#665c4e]'
+              }`}
+            >
+              {readout.percent}%
+            </span>
+          </div>
+
+          {/* Hairline archival ink progress rule mirroring live reading completion */}
+          <motion.div
+            aria-hidden="true"
+            className="absolute inset-x-0 bottom-0 h-[1.5px] origin-left bg-[#4f6df5] will-change-transform"
+            style={{ scaleX: activeProgress }}
+          />
+        </div>
+      </motion.aside>
     </>
   );
 }

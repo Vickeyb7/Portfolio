@@ -403,7 +403,7 @@ export function CoverSection({ isDark, onExploreBelow }: CoverSectionProps) {
           Selected Works &amp; Interactive CV
         </span>
         <span className="hidden sm:inline font-mono tabular-nums">
-          {PROFILE.location} · 2026
+          {PROFILE.location ? `${PROFILE.location} · 2026` : 'Edition · 2026'}
         </span>
       </motion.div>
 

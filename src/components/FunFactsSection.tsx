@@ -21,8 +21,8 @@ const FUN_FACTS: FunFactDoodle[] = [
     id: 'filter-coffee',
     index: '01',
     title: '7 AM Filter Coffee & PRDs',
-    fact: 'My sharpest product specs start with a brass-tumbler Bengaluru filter coffee and a blank page before Slack wakes up.',
-    accentNote: 'Indiranagar roast',
+    fact: 'My sharpest product specs start with a brass-tumbler filter coffee and a blank page before Slack wakes up.',
+    accentNote: 'dark roast, zero sugar',
     paths: [
       // Davara saucer
       { d: 'M 20 72 C 26 80, 74 80, 80 72', strokeWidth: 2.1 },
@@ -278,7 +278,7 @@ function DoodleCard({ item }: { item: FunFactDoodle }) {
       onFocus={handleHoverWiggle}
       onClick={handleClickRedraw}
       aria-label={`${item.title}: ${item.fact} Click to redraw illustration.`}
-      className="group relative flex h-full w-full flex-col justify-between bg-[#181c27]/90 hover:bg-[#1e2332] p-6 sm:p-7 text-left transition-colors duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#8aa2ff]"
+      className="print-keep group relative flex h-full w-full flex-col justify-between bg-[#181c27]/90 hover:bg-[#1e2332] p-6 sm:p-7 text-left transition-colors duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#8aa2ff]"
     >
       <div>
         {/* Top editorial row: clean index & interactive redraw hint */}
@@ -287,7 +287,7 @@ function DoodleCard({ item }: { item: FunFactDoodle }) {
             {item.index}.
           </span>
           <span
-            className={`font-hand text-sm tracking-[0.01em] transition-opacity duration-200 ${
+            className={`no-print font-hand text-sm tracking-[0.01em] transition-opacity duration-200 ${
               isRedrawing
                 ? 'opacity-100 text-[#8aa2ff]'
                 : 'opacity-65 group-hover:opacity-100 text-[#9aa4c2] group-hover:text-[#8aa2ff]'

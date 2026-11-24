@@ -128,7 +128,7 @@ export function ResumeDrawer({ open, onClose }: ResumeDrawerProps) {
                 {PROFILE.name}
               </h1>
               <p className="text-xs text-slate-600 dark:text-[#94a3b8]">
-                {PROFILE.location} · {PROFILE.email}
+                {PROFILE.location ? `${PROFILE.location} · ${PROFILE.email}` : PROFILE.email}
               </p>
             </div>
             <p className="mt-1 font-display text-sm font-semibold text-[#1d4ed8] dark:text-[#b5c4ff]">

@@ -329,15 +329,135 @@ html.dark .editorial-scroll::-webkit-scrollbar-thumb:hover {
   }
 }
 
-/* Clean recruiter PDF print mode */
+/* Clean professional document & recruiter PDF print mode */
 @media print {
+  @page {
+    size: auto;
+    margin: 14mm 14mm 16mm 14mm;
+  }
+
+  html,
   body {
     background: #ffffff !important;
+    background-image: none !important;
     color: #0f172a !important;
+    font-size: 11pt;
+    line-height: 1.5;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
-  .no-print {
+
+  /* Hide non-essential chrome, navigation, cursors, debug tools, ink washes, filter controls, and modals */
+  .no-print,
+  header,
+  nav,
+  .nimbus-nav,
+  [data-magnetic-cursor="true"],
+  [data-scrollspy-debug="true"],
+  [data-scroll-target="true"],
+  [data-ink-wash-active],
+  [role="tablist"],
+  [role="tab"],
+  [role="dialog"]:not(:has(.print-only-sheet)),
+  .surface-modal:not(.print-only-sheet),
+  button:not(.print-keep),
+  .btn-primary-electric {
     display: none !important;
   }
+
+  /* Normalize content-bearing buttons marked print-keep into clean static typography */
+  button.print-keep {
+    appearance: none !important;
+    background: transparent !important;
+    border-color: #cbd5e1 !important;
+    color: #0f172a !important;
+    cursor: default !important;
+  }
+
+  /* Normalize alternating paper/night editorial sheets to clean white document pages */
+  .editorial-sheet-paper,
+  .editorial-sheet-night,
+  [data-sheet="paper"],
+  [data-sheet="night"],
+  .surface-card {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    background-image: none !important;
+    color: #0f172a !important;
+    border-color: #cbd5e1 !important;
+    box-shadow: none !important;
+    clip-path: none !important;
+    overflow: visible !important;
+  }
+
+  /* Ensure scrolled/lazy/staggered sections print visibly without clipping or transforms */
+  main,
+  main section,
+  main div,
+  main article,
+  main figure,
+  main p,
+  main li {
+    opacity: 1 !important;
+    transform: none !important;
+    clip-path: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    box-shadow: none !important;
+    transition: none !important;
+    animation: none !important;
+  }
+
+  /* Enforce crisp dark ink contrast on text formerly styled for Charcoal Night sheets */
+  main h1,
+  main h2,
+  main h3,
+  main h4,
+  main p,
+  main li,
+  main dt,
+  main dd,
+  main blockquote,
+  main figcaption,
+  main span {
+    color: #0f172a !important;
+  }
+
+  main a {
+    color: #1e3a8a !important;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  /* Render dark-sheet SVG line art in crisp archival ink on white paper */
+  [data-sheet="night"] svg path {
+    stroke: #1e293b !important;
+  }
+
+  /* Clean document pagination & break discipline */
+  h1,
+  h2,
+  h3,
+  h4 {
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+
+  article,
+  figure,
+  blockquote,
+  img,
+  .surface-card,
+  button.print-keep {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  img {
+    max-width: 100% !important;
+  }
+
+  /* Dedicated One-Page Resume PDF drawer sheet */
   .print-only-sheet {
     position: static !important;
     max-height: none !important;
@@ -346,8 +466,10 @@ html.dark .editorial-scroll::-webkit-scrollbar-thumb:hover {
     color: #0f172a !important;
     box-shadow: none !important;
     border: none !important;
+    border-radius: 0 !important;
     padding: 0 !important;
   }
+
   .print-only-sheet * {
     color: #0f172a !important;
     border-color: #cbd5e1 !important;
@@ -386,6 +508,7 @@ html.dark .editorial-scroll::-webkit-scrollbar-thumb:hover {
   border-radius: inherit;
   z-index: -2;
   overflow: hidden;
+  pointer-events: none;
   background: var(--n-tint);
   -webkit-backdrop-filter: blur(12px) saturate(1.25) brightness(1.06);
   backdrop-filter: blur(12px) saturate(1.25) brightness(1.06);

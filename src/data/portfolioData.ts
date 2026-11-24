@@ -139,7 +139,7 @@ export const PROFILE = {
   firstName: 'Shankar',
   role: 'SaaS Product Manager',
   kicker: 'SaaS Product Manager · Enterprise GTM to Product',
-  location: 'Bengaluru, India',
+  location: '',
   availability: 'Open to PM & APM roles in B2B SaaS, DevTools & FinTech',
   email: 'snb2990@gmail.com',
   linkedin: 'https://linkedin.com/in/shankarnarayanbhattacharjee',
@@ -581,7 +581,7 @@ export const TIMELINE_MILESTONES: TimelineMilestone[] = [
     period: 'Apr 2024 – Present',
     role: 'Senior Enterprise Account Executive',
     organization: 'BrowserStack',
-    location: 'Bengaluru · NA & EMEA Enterprise',
+    location: 'NA & EMEA Enterprise',
     headlineMetric: '$1.1M+ New & Expansion ARR · 142% Avg Attainment',
     summary:
       'Owned full-cycle enterprise acquisition and multi-product expansion across Fortune 1000 engineering organizations adopting Automated Testing, App Automate, and Percy Visual QA.',
@@ -598,7 +598,7 @@ export const TIMELINE_MILESTONES: TimelineMilestone[] = [
     period: 'Jun 2022 – Mar 2024',
     role: 'Mid-Market Account Executive',
     organization: 'BrowserStack',
-    location: 'Mumbai & Bengaluru · Global SaaS',
+    location: 'Global SaaS · Mid-Market',
     headlineMetric: '$720K+ ARR Closed · #1 Mid-Market Ramp',
     summary:
       'Partnered with high-growth developer teams (Series B to Pre-IPO) to transition fragmented in-house Selenium grids onto BrowserStack cloud infrastructure.',
@@ -615,7 +615,7 @@ export const TIMELINE_MILESTONES: TimelineMilestone[] = [
     period: 'Jul 2021 – May 2022',
     role: 'Business Operations & GTM Analyst',
     organization: 'Razorpay',
-    location: 'Bengaluru · FinTech Infrastructure',
+    location: 'FinTech Infrastructure',
     headlineMetric: '+18% Funnel Velocity via SQL Diagnostics',
     summary:
       'Built SQL-driven funnel instrumentation and pricing sensitivity models supporting RazorpayX B2B banking and payment gateway merchant onboarding.',
@@ -827,7 +827,7 @@ export const TESTIMONIALS: Testimonial[] = [
 
 export const PLAIN_TEXT_CV = `SHANKAR NARAYAN BHATTACHARJEE
 SaaS Product Manager | Enterprise GTM to Product
-Bengaluru, India | snb2990@gmail.com | linkedin.com/in/shankarnarayanbhattacharjee
+snb2990@gmail.com | linkedin.com/in/shankarnarayanbhattacharjee
 
 EXECUTIVE SUMMARY
 Emerging SaaS Product Manager with a B.Tech in Computer Science, 4+ years of developer-first enterprise sales & GTM rigor at BrowserStack ($1.8M+ ARR influenced, 142% avg attainment), and Top 1% Product Management Fellowship distinction from NextLeap. Specialized in Developer Tools, PLG-to-Enterprise activation, usage telemetry, and 0-to-1 B2B SaaS execution.

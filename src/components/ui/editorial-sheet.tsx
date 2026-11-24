@@ -13,6 +13,7 @@ interface EditorialSheetProps {
   sheetLabel: string;
   children: ReactNode;
   className?: string;
+  entranceMode?: 'scroll' | 'unfold';
 }
 
 /**
@@ -20,6 +21,8 @@ interface EditorialSheetProps {
  * Expands via GSAP ScrollTrigger from an inset rounded card into edge-to-edge
  * full bleed using GPU-composited clip-path & subtle inset border fading,
  * keeping the outer wrapper untransformed so scroll-spy refs stay exact.
+ * Supports `entranceMode="unfold"` for top-of-page sheets so they unfold
+ * open like a physical archival dossier page immediately on entry.
  */
 export function EditorialSheet({
   tone,
@@ -27,16 +30,19 @@ export function EditorialSheet({
   sheetLabel,
   children,
   className = '',
+  entranceMode = 'scroll',
 }: EditorialSheetProps) {
   const triggerRef = useRef<HTMLDivElement>(null);
   const surfaceRef = useRef<HTMLDivElement>(null);
   const cardOutlineRef = useRef<HTMLDivElement>(null);
+  const foldCreaseRef = useRef<HTMLDivElement>(null);
   const highlight = useSectionHighlight();
 
   useLayoutEffect(() => {
     const triggerEl = triggerRef.current;
     const surfaceEl = surfaceRef.current;
     const outlineEl = cardOutlineRef.current;
+    const creaseEl = foldCreaseRef.current;
     if (!triggerEl || !surfaceEl) return;
 
     const mm = gsap.matchMedia();
@@ -56,6 +62,75 @@ export function EditorialSheet({
           });
           if (outlineEl) {
             gsap.set(outlineEl, { opacity: 0 });
+          }
+          if (creaseEl) {
+            gsap.set(creaseEl, { opacity: 0 });
+          }
+          return;
+        }
+
+        if (entranceMode === 'unfold') {
+          const startInset = desktop
+            ? 'inset(0px 4.2% 8% 4.2% round 34px)'
+            : 'inset(0px 2.8% 6% 2.8% round 22px)';
+
+          gsap.set(surfaceEl, {
+            clipPath: startInset,
+          });
+
+          const unfoldTl = gsap.timeline({
+            defaults: { ease: 'power3.out' },
+            onComplete: () => {
+              ScrollTrigger.refresh();
+            },
+          });
+
+          unfoldTl.to(
+            surfaceEl,
+            {
+              clipPath: 'inset(0px 0% 0% 0% round 0px)',
+              duration: 1.05,
+            },
+            0.06
+          );
+
+          if (outlineEl) {
+            gsap.set(outlineEl, {
+              opacity: 1,
+              left: desktop ? '4.2%' : '2.8%',
+              right: desktop ? '4.2%' : '2.8%',
+              borderRadius: desktop ? 34 : 22,
+            });
+
+            unfoldTl.to(
+              outlineEl,
+              {
+                left: '0%',
+                right: '0%',
+                borderRadius: 0,
+                opacity: 0,
+                duration: 1.05,
+              },
+              0.06
+            );
+          }
+
+          if (creaseEl) {
+            gsap.set(creaseEl, {
+              opacity: 0.75,
+              yPercent: -10,
+            });
+
+            unfoldTl.to(
+              creaseEl,
+              {
+                yPercent: 220,
+                opacity: 0,
+                duration: 1.0,
+                ease: 'power2.out',
+              },
+              0.08
+            );
           }
           return;
         }
@@ -115,7 +190,7 @@ export function EditorialSheet({
     return () => {
       mm.revert();
     };
-  }, []);
+  }, [entranceMode]);
 
   const isPaper = tone === 'paper';
 
@@ -143,6 +218,20 @@ export function EditorialSheet({
           isPaper ? 'editorial-sheet-paper' : 'editorial-sheet-night'
         }`}
       >
+        {/* Subtle horizontal paper-fold shadow sheen that sweeps away during unfold entry */}
+        {entranceMode === 'unfold' && (
+          <div
+            ref={foldCreaseRef}
+            aria-hidden="true"
+            className="no-print pointer-events-none absolute inset-x-0 top-0 z-20 h-36 opacity-0 will-change-transform"
+            style={{
+              background: isPaper
+                ? 'linear-gradient(180deg, rgba(42,35,25,0.09) 0%, rgba(42,35,25,0.03) 42%, rgba(255,255,255,0) 100%)'
+                : 'linear-gradient(180deg, rgba(0,0,0,0.28) 0%, rgba(0,0,0,0.08) 45%, rgba(0,0,0,0) 100%)',
+            }}
+          />
+        )}
+
         {/* Active-section animated ink-wash overlay behind sheet typography */}
         {highlight && (
           <SectionInkWashLayer

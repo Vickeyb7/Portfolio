@@ -234,6 +234,7 @@ export function MagneticCursor({ isDark }: MagneticCursorProps) {
   return (
     <div
       aria-hidden="true"
+      data-magnetic-cursor="true"
       className="no-print pointer-events-none fixed inset-0 z-[70] overflow-hidden"
     >
       {/* Magnetic outer halo ring (compositor-only transform & opacity) */}

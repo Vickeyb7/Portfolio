@@ -336,12 +336,12 @@ export function ThankYouSection({
                       type="button"
                       onClick={handleCopyEmail}
                       title="Click to copy email address"
-                      className="group relative inline-flex items-center font-serif text-[1.55rem] sm:text-[1.8rem] font-bold tracking-[-0.015em] text-[#141413] hover:text-[#4f6df5] transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4f6df5] rounded"
+                      className="print-keep group relative inline-flex items-center font-serif text-[1.55rem] sm:text-[1.8rem] font-bold tracking-[-0.015em] text-[#141413] hover:text-[#4f6df5] transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4f6df5] rounded"
                     >
                       <span>{PROFILE.email}</span>
                       <span
                         aria-hidden="true"
-                        className="absolute inset-x-0 -bottom-0.5 h-[2px] origin-left scale-x-0 bg-[#4f6df5] transition-transform duration-200 group-hover:scale-x-100"
+                        className="no-print absolute inset-x-0 -bottom-0.5 h-[2px] origin-left scale-x-0 bg-[#4f6df5] transition-transform duration-200 group-hover:scale-x-100"
                       />
                     </button>
 
@@ -349,7 +349,7 @@ export function ThankYouSection({
                       type="button"
                       onClick={handleCopyEmail}
                       aria-label={copied ? 'Email copied to clipboard' : 'Copy email address'}
-                      className="inline-flex min-h-[36px] items-center gap-1.5 rounded-md px-2 py-1 text-xs font-semibold text-[#4f6df5] hover:bg-[#4f6df5]/[0.08] transition-colors whitespace-nowrap shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4f6df5]"
+                      className="no-print inline-flex min-h-[36px] items-center gap-1.5 rounded-md px-2 py-1 text-xs font-semibold text-[#4f6df5] hover:bg-[#4f6df5]/[0.08] transition-colors whitespace-nowrap shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4f6df5]"
                     >
                       {copied ? (
                         <>
@@ -473,7 +473,7 @@ export function ThankYouSection({
               {/* Quiet Editorial Closing Bar matching reference layout */}
               <div className="mt-14 flex flex-wrap items-center justify-between gap-4 border-t border-[#2a2319]/12 pt-5 text-xs text-[#6f675b]">
                 <p>
-                  {PROFILE.name} · {PROFILE.role} · Bengaluru
+                  {PROFILE.name} · {PROFILE.role}
                 </p>
 
                 <button

@@ -8,6 +8,7 @@ import {
   Suspense,
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from 'react';
@@ -16,8 +17,9 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Navbar } from './components/Navbar';
 import { CoverSection } from './components/CoverSection';
-import { HeroSection } from './components/HeroSection';
+import { HelloSection } from './components/HelloSection';
 import { ScrollProgressBar } from './components/ui/scroll-progress-bar';
+import { SectionProgressIndicator } from './components/ui/section-progress-indicator';
 import { MagneticCursor } from './components/ui/magnetic-cursor';
 import { HandDrawnDivider } from './components/ui/hand-drawn-divider';
 import { ScrollTargetAnchor } from './components/ui/scroll-target-anchor';
@@ -148,6 +150,32 @@ function getStickyHeaderHeight(): number {
   return Number.isFinite(measured) && measured > 0
     ? Math.round(measured)
     : DEFAULT_HEADER_HEIGHT;
+}
+
+function getLiveStickyHeaderOffset(): number {
+  return getStickyHeaderHeight() + SCROLL_PADDING_BUFFER;
+}
+
+function getDocumentScrollTop(): number {
+  if (typeof window === 'undefined' || typeof document === 'undefined') return 0;
+  return (
+    window.scrollY ||
+    window.pageYOffset ||
+    document.scrollingElement?.scrollTop ||
+    document.documentElement.scrollTop ||
+    document.body.scrollTop ||
+    0
+  );
+}
+
+function getDocumentMaxScrollY(): number {
+  if (typeof window === 'undefined' || typeof document === 'undefined') return 0;
+  const scrollHeight = Math.max(
+    document.scrollingElement?.scrollHeight ?? 0,
+    document.documentElement.scrollHeight,
+    document.body.scrollHeight
+  );
+  return Math.max(0, scrollHeight - window.innerHeight);
 }
 
 function computeScrollSpyMetrics(): ScrollSpyMetrics {
@@ -354,12 +382,36 @@ export default function App() {
   });
   const scrollLockUntilRef = useRef<number>(0);
   const pendingScrollTargetRef = useRef<SectionId | null>(null);
+  const activeScrollTweenRef = useRef<gsap.core.Tween | null>(null);
+  const pendingRefreshAfterScrollRef = useRef<boolean>(false);
   const heroAnchorRef = useRef<HTMLDivElement>(null);
 
-  const registerSectionRef = useCallback(
-    (id: SectionId) => (el: HTMLDivElement | null) => {
-      sectionRefs.current[id] = el;
-    },
+  // Keep root CSS scroll-padding-top synchronized with the live sticky header height
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+    document.documentElement.style.scrollPaddingTop = `${stickyHeaderOffset}px`;
+  }, [stickyHeaderOffset]);
+
+  const sectionRefCallbacks = useMemo<
+    Record<SectionId, (el: HTMLDivElement | null) => void>
+  >(
+    () => ({
+      overview: (el) => {
+        sectionRefs.current.overview = el;
+      },
+      'case-studies': (el) => {
+        sectionRefs.current['case-studies'] = el;
+      },
+      experience: (el) => {
+        sectionRefs.current.experience = el;
+      },
+      capabilities: (el) => {
+        sectionRefs.current.capabilities = el;
+      },
+      contact: (el) => {
+        sectionRefs.current.contact = el;
+      },
+    }),
     []
   );
 
@@ -395,7 +447,9 @@ export default function App() {
         } else {
           mapping[id] = {
             mapped: true,
-            top: Math.round(el.getBoundingClientRect().top + window.scrollY),
+            top: Math.round(
+              el.getBoundingClientRect().top + getDocumentScrollTop()
+            ),
           };
         }
       }
@@ -439,56 +493,153 @@ export default function App() {
     }
   }, []);
 
+  const cancelActiveScrollTween = useCallback(() => {
+    if (activeScrollTweenRef.current) {
+      activeScrollTweenRef.current.kill();
+      activeScrollTweenRef.current = null;
+    }
+  }, []);
+
+  // Unified GSAP smooth-scroll engine: interpolates a proxy object rather than
+  // relying on ScrollToPlugin's autoKill heuristic (which can falsely abort on
+  // ScrollTrigger refreshes, DPR rounding, or iframe scroll clamping), while
+  // dynamically tracking target anchor shifts as lazy sections hydrate.
+  const smoothScrollWindowTo = useCallback(
+    (fallbackTargetY: number, resolveLiveTargetY?: () => number | null) => {
+      cancelActiveScrollTween();
+
+      const computeClampedTarget = () => {
+        const live = resolveLiveTargetY ? resolveLiveTargetY() : fallbackTargetY;
+        const raw =
+          live !== null && Number.isFinite(live) ? live : fallbackTargetY;
+        return Math.max(0, Math.min(getDocumentMaxScrollY(), Math.round(raw)));
+      };
+
+      const applyScrollY = (y: number) => {
+        const clamped = Math.max(0, Math.min(getDocumentMaxScrollY(), y));
+        window.scrollTo({ top: clamped, left: 0, behavior: 'auto' });
+        if (Math.abs(getDocumentScrollTop() - clamped) > 2) {
+          if (document.scrollingElement) {
+            document.scrollingElement.scrollTop = clamped;
+          }
+          document.documentElement.scrollTop = clamped;
+          document.body.scrollTop = clamped;
+        }
+      };
+
+      const finishScroll = () => {
+        activeScrollTweenRef.current = null;
+        pendingScrollTargetRef.current = null;
+        if (pendingRefreshAfterScrollRef.current) {
+          pendingRefreshAfterScrollRef.current = false;
+          ScrollTrigger.refresh();
+        } else {
+          ScrollTrigger.update();
+        }
+      };
+
+      const targetY = computeClampedTarget();
+      const reduceMotion =
+        typeof window !== 'undefined' &&
+        window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      if (reduceMotion) {
+        applyScrollY(targetY);
+        finishScroll();
+        return;
+      }
+
+      const startY = getDocumentScrollTop();
+      if (Math.abs(targetY - startY) < 2) {
+        applyScrollY(targetY);
+        finishScroll();
+        return;
+      }
+
+      const proxy = { progress: 0 };
+      activeScrollTweenRef.current = gsap.to(proxy, {
+        progress: 1,
+        duration: 0.78,
+        ease: 'power3.out',
+        onUpdate: () => {
+          const liveTarget = computeClampedTarget();
+          const nextY = startY + (liveTarget - startY) * proxy.progress;
+          applyScrollY(nextY);
+          ScrollTrigger.update();
+        },
+        onComplete: () => {
+          const liveTarget = computeClampedTarget();
+          applyScrollY(liveTarget);
+          finishScroll();
+        },
+      });
+    },
+    [cancelActiveScrollTween]
+  );
+
   // Unified scroll-to-section handler measuring live sticky navbar height & verified anchor refs
   const scrollToSection = useCallback(
     (id: SectionId) => {
       setActiveSection(id);
       setIsThankYouVisible(id === 'contact');
       setRevealedSections((prev) => ({ ...prev, [id]: true }));
-      scrollLockUntilRef.current = performance.now() + 1000;
+      scrollLockUntilRef.current = performance.now() + 900;
       pendingScrollTargetRef.current = id;
 
       if (id === 'overview') {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        smoothScrollWindowTo(0, () => 0);
         return;
       }
 
-      const targetEl = resolveSectionElement(id);
-      if (!targetEl) {
+      const measureTargetY = (): number | null => {
+        const el = resolveSectionElement(id);
+        if (!el) return null;
+        const rect = el.getBoundingClientRect();
+        if (!Number.isFinite(rect.top)) return null;
+        return rect.top + getDocumentScrollTop() - getLiveStickyHeaderOffset();
+      };
+
+      const initialTop = measureTargetY();
+      if (initialTop === null) {
         console.warn(
           `[Navigation] Target section anchor "#${id}" is not yet available in DOM.`
         );
         return;
       }
 
-      const rect = targetEl.getBoundingClientRect();
-      if (!Number.isFinite(rect.top)) return;
-
-      const headerOffset = getStickyHeaderHeight() + SCROLL_PADDING_BUFFER;
-      const targetTop = rect.top + window.scrollY - headerOffset;
-
-      window.scrollTo({
-        top: Math.max(0, Math.round(targetTop)),
-        behavior: 'smooth',
-      });
+      smoothScrollWindowTo(initialTop, measureTargetY);
     },
-    [resolveSectionElement]
+    [resolveSectionElement, smoothScrollWindowTo]
   );
 
   const scrollToHero = useCallback(() => {
-    const el = heroAnchorRef.current;
-    if (!el || !el.isConnected) return;
-    const headerOffset = getStickyHeaderHeight() + SCROLL_PADDING_BUFFER;
-    const top = el.getBoundingClientRect().top + window.scrollY - headerOffset;
-    window.scrollTo({
-      top: Math.max(0, Math.round(top)),
-      behavior: 'smooth',
-    });
-  }, []);
+    const measureHeroY = (): number | null => {
+      const el = heroAnchorRef.current;
+      if (!el || !el.isConnected) return null;
+      return (
+        el.getBoundingClientRect().top +
+        getDocumentScrollTop() -
+        getLiveStickyHeaderOffset()
+      );
+    };
+    const top = measureHeroY();
+    if (top === null) return;
+    smoothScrollWindowTo(top, measureHeroY);
+  }, [smoothScrollWindowTo]);
 
   // Unified scroll-spy tracking against verified section anchors & freshly queried sticky navbar height
   useEffect(() => {
-    const releaseScrollLock = () => {
+    const releaseScrollLock = (event?: Event) => {
+      if (event?.type === 'touchstart' && event.target instanceof Element) {
+        if (
+          event.target.closest(
+            '[data-sticky-header="true"], [data-section-progress="true"]'
+          )
+        ) {
+          return;
+        }
+      }
+      cancelActiveScrollTween();
       scrollLockUntilRef.current = 0;
       pendingScrollTargetRef.current = null;
     };
@@ -514,10 +665,9 @@ export default function App() {
       }
       pendingScrollTargetRef.current = null;
 
-      const scrollTop = window.scrollY;
-      const scrollHeight = document.documentElement.scrollHeight;
-      const atBottom =
-        scrollTop > 40 && window.innerHeight + scrollTop >= scrollHeight - 24;
+      const scrollTop = getDocumentScrollTop();
+      const maxScrollY = getDocumentMaxScrollY();
+      const atBottom = scrollTop > 40 && maxScrollY - scrollTop <= 24;
 
       if (atBottom) {
         setActiveSection((prev) => (prev === 'contact' ? prev : 'contact'));
@@ -561,7 +711,7 @@ export default function App() {
     window.addEventListener('wheel', releaseScrollLock, { passive: true });
     window.addEventListener('touchstart', releaseScrollLock, { passive: true });
 
-    // Re-sync scroll-spy, pending nav jumps, and GSAP ScrollTrigger positions when lazy sections change page height
+    // Re-sync scroll-spy & GSAP ScrollTrigger positions when lazy sections change page height
     let resizeObserver: ResizeObserver | null = null;
     let refreshTimer: number | null = null;
     if (typeof ResizeObserver !== 'undefined' && mainRef.current) {
@@ -570,29 +720,18 @@ export default function App() {
           window.clearTimeout(refreshTimer);
         }
         refreshTimer = window.setTimeout(() => {
-          ScrollTrigger.refresh();
-          refreshTimer = null;
-        }, 120);
-
-        const pendingId = pendingScrollTargetRef.current;
-        if (
-          pendingId &&
-          pendingId !== 'overview' &&
-          performance.now() < scrollLockUntilRef.current
-        ) {
-          const targetEl = resolveSectionElement(pendingId);
-          if (targetEl) {
-            const headerOffset = getStickyHeaderHeight() + SCROLL_PADDING_BUFFER;
-            const targetTop =
-              targetEl.getBoundingClientRect().top + window.scrollY - headerOffset;
-            window.scrollTo({
-              top: Math.max(0, Math.round(targetTop)),
-              behavior: 'smooth',
-            });
+          // Defer ScrollTrigger.refresh until an active programmatic nav scroll completes
+          if (activeScrollTweenRef.current) {
+            pendingRefreshAfterScrollRef.current = true;
+          } else {
+            ScrollTrigger.refresh();
           }
-          return;
+          refreshTimer = null;
+        }, 160);
+
+        if (!activeScrollTweenRef.current) {
+          updateActiveSection();
         }
-        updateActiveSection();
       });
       resizeObserver.observe(mainRef.current);
       const headerEl = document.querySelector<HTMLElement>(
@@ -604,6 +743,7 @@ export default function App() {
     }
 
     return () => {
+      cancelActiveScrollTween();
       window.removeEventListener('scroll', updateActiveSection);
       window.removeEventListener('resize', updateActiveSection);
       window.removeEventListener('wheel', releaseScrollLock);
@@ -613,7 +753,7 @@ export default function App() {
         window.clearTimeout(refreshTimer);
       }
     };
-  }, [resolveSectionElement]);
+  }, [cancelActiveScrollTween, resolveSectionElement]);
 
   // Global keyboard shortcuts: 'n' next section, 'p' previous section, 'Esc' closes active modals/drawers
   useEffect(() => {
@@ -687,18 +827,23 @@ export default function App() {
       if (!mainEl) return;
 
       mainEl.focus({ preventScroll: true });
-      const rect = mainEl.getBoundingClientRect();
-      if (Number.isFinite(rect.top)) {
-        const headerOffset = getStickyHeaderHeight() + SCROLL_PADDING_BUFFER;
-        const targetTop = Math.max(
+      const measureMainY = (): number | null => {
+        const rect = mainEl.getBoundingClientRect();
+        if (!Number.isFinite(rect.top)) return null;
+        return Math.max(
           0,
-          Math.round(rect.top + window.scrollY - headerOffset)
+          Math.round(
+            rect.top + getDocumentScrollTop() - getLiveStickyHeaderOffset()
+          )
         );
-        window.scrollTo({ top: targetTop, behavior: 'smooth' });
+      };
+      const targetTop = measureMainY();
+      if (targetTop !== null) {
+        smoothScrollWindowTo(targetTop, measureMainY);
       }
       setKeyboardAnnouncement('Skipped to main content');
     },
-    []
+    [smoothScrollWindowTo]
   );
 
   const handleNextCaseStudy = (currentId: string) => {
@@ -743,6 +888,10 @@ export default function App() {
           isDark={false}
         />
         <ScrollProgressBar isDark={false} />
+        <SectionProgressIndicator
+          activeSection={activeSection}
+          onNavigate={scrollToSection}
+        />
         <MagneticCursor isDark={false} />
         {import.meta.env.DEV && (
           <ScrollSpyDebugLine
@@ -764,7 +913,7 @@ export default function App() {
           id="main-content"
           ref={mainRef}
           tabIndex={-1}
-          className="no-print focus:outline-none"
+          className={`${resumeOpen ? 'no-print ' : ''}focus:outline-none`}
         >
           {/* Top overview container + transparent ScrollTargetAnchor markers for remaining sections */}
           <SectionHighlighter
@@ -775,7 +924,10 @@ export default function App() {
           >
             <div
               id="overview"
-              ref={registerSectionRef('overview')}
+              ref={sectionRefCallbacks.overview}
+              data-scroll-target="true"
+              data-section-id="overview"
+              data-header-offset={stickyHeaderOffset}
               style={{ scrollMarginTop: `${stickyHeaderOffset}px` }}
             >
               <CoverSection isDark={false} onExploreBelow={scrollToHero} />
@@ -785,7 +937,7 @@ export default function App() {
                 style={{ scrollMarginTop: `${stickyHeaderOffset}px` }}
               >
                 <SectionReveal forceVisible={!!revealedSections.overview} delay={0.04}>
-                  <HeroSection
+                  <HelloSection
                     onOpenResume={() => setResumeOpen(true)}
                     onJumpToCaseStudies={() => scrollToSection('case-studies')}
                   />
@@ -813,7 +965,7 @@ export default function App() {
             <ScrollTargetAnchor
               id="case-studies"
               label="Case Studies"
-              ref={registerSectionRef('case-studies')}
+              ref={sectionRefCallbacks['case-studies']}
               headerOffset={stickyHeaderOffset}
             />
             <SectionReveal
@@ -839,7 +991,7 @@ export default function App() {
             <ScrollTargetAnchor
               id="experience"
               label="Experience"
-              ref={registerSectionRef('experience')}
+              ref={sectionRefCallbacks.experience}
               headerOffset={stickyHeaderOffset}
             />
             <SectionReveal
@@ -865,7 +1017,7 @@ export default function App() {
             <ScrollTargetAnchor
               id="capabilities"
               label="Capabilities"
-              ref={registerSectionRef('capabilities')}
+              ref={sectionRefCallbacks.capabilities}
               headerOffset={stickyHeaderOffset}
             />
             <SectionReveal
@@ -901,7 +1053,7 @@ export default function App() {
             <ScrollTargetAnchor
               id="contact"
               label="Contact"
-              ref={registerSectionRef('contact')}
+              ref={sectionRefCallbacks.contact}
               headerOffset={stickyHeaderOffset}
             />
             <SectionReveal forceVisible={!!revealedSections.contact} delay={0.04}>

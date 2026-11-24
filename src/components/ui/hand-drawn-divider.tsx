@@ -1,4 +1,5 @@
-import { useLayoutEffect, useRef } from 'react';
+import { useId, useLayoutEffect, useRef } from 'react';
+import { motion, useInView, useReducedMotion } from 'motion/react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
@@ -45,7 +46,8 @@ const DIVIDER_SHAPES: Record<
 
 /**
  * Subtle hand-drawn periwinkle-cobalt horizontal pen divider for editorial
- * section breaks. Draws itself smoothly via GSAP ScrollTrigger and respects
+ * section breaks. Draws itself smoothly via GSAP ScrollTrigger and adds an
+ * understated Framer Motion ink-flow shimmer while in view, respecting
  * prefers-reduced-motion.
  */
 export function HandDrawnDivider({
@@ -54,6 +56,9 @@ export function HandDrawnDivider({
 }: HandDrawnDividerProps) {
   const wrapRef = useRef<HTMLDivElement>(null);
   const svgRef = useRef<SVGSVGElement>(null);
+  const shimmerGradientId = useId();
+  const prefersReducedMotion = Boolean(useReducedMotion());
+  const isInView = useInView(wrapRef, { amount: 0.25 });
 
   const shape = DIVIDER_SHAPES[variant];
 
@@ -62,7 +67,9 @@ export function HandDrawnDivider({
     const svgEl = svgRef.current;
     if (!wrapEl || !svgEl) return;
 
-    const paths = Array.from(svgEl.querySelectorAll<SVGPathElement>('path'));
+    const paths = Array.from(
+      svgEl.querySelectorAll<SVGPathElement>('[data-divider-draw="true"]')
+    );
     if (paths.length === 0) return;
 
     const mm = gsap.matchMedia();
@@ -109,6 +116,8 @@ export function HandDrawnDivider({
     };
   }, [variant]);
 
+  const shouldAnimateShimmer = isInView && !prefersReducedMotion;
+
   return (
     <div
       ref={wrapRef}
@@ -124,7 +133,25 @@ export function HandDrawnDivider({
         preserveAspectRatio="xMidYMid meet"
         className="h-6 w-full overflow-visible text-[#4f6df5]/70"
       >
+        <defs>
+          <linearGradient
+            id={shimmerGradientId}
+            x1="0%"
+            y1="0%"
+            x2="100%"
+            y2="0%"
+          >
+            <stop offset="0%" stopColor="#4f6df5" stopOpacity="0" />
+            <stop offset="32%" stopColor="#7c96ff" stopOpacity="0.85" />
+            <stop offset="52%" stopColor="#dce5ff" stopOpacity="0.98" />
+            <stop offset="70%" stopColor="#d8b56c" stopOpacity="0.72" />
+            <stop offset="100%" stopColor="#4f6df5" stopOpacity="0" />
+          </linearGradient>
+        </defs>
+
+        {/* Base GSAP ScrollTrigger self-drawing fountain-pen strokes */}
         <path
+          data-divider-draw="true"
           d={shape.primary}
           stroke="currentColor"
           strokeWidth="1.75"
@@ -132,6 +159,7 @@ export function HandDrawnDivider({
           strokeLinejoin="round"
         />
         <path
+          data-divider-draw="true"
           d={shape.secondary}
           stroke="currentColor"
           strokeWidth="1"
@@ -140,6 +168,7 @@ export function HandDrawnDivider({
         />
         {shape.ornament && (
           <path
+            data-divider-draw="true"
             d={shape.ornament}
             stroke="currentColor"
             strokeWidth="1.65"
@@ -147,7 +176,90 @@ export function HandDrawnDivider({
             strokeLinejoin="round"
           />
         )}
+
+        {/* Framer Motion wet-ink flow shimmer gliding along the pen curve when in view */}
+        {!prefersReducedMotion && (
+          <>
+            <motion.path
+              d={shape.primary}
+              stroke={`url(#${shimmerGradientId})`}
+              strokeWidth="2.35"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              initial={{ pathLength: 0.14, pathOffset: 0, opacity: 0 }}
+              animate={
+                shouldAnimateShimmer
+                  ? {
+                      pathOffset: [0, 0.86],
+                      opacity: [0, 0.88, 0.92, 0],
+                    }
+                  : { pathOffset: 0, opacity: 0 }
+              }
+              transition={{
+                duration: 2.6,
+                delay: 0.85,
+                ease: [0.42, 0, 0.24, 1],
+                repeat: Infinity,
+                repeatDelay: 3.6,
+              }}
+            />
+
+            {/* Subtle secondary counter-flow glint on the lower ink taper */}
+            <motion.path
+              d={shape.secondary}
+              stroke={`url(#${shimmerGradientId})`}
+              strokeWidth="1.35"
+              strokeLinecap="round"
+              initial={{ pathLength: 0.22, pathOffset: 0.78, opacity: 0 }}
+              animate={
+                shouldAnimateShimmer
+                  ? {
+                      pathOffset: [0.78, 0],
+                      opacity: [0, 0.55, 0.5, 0],
+                    }
+                  : { pathOffset: 0.78, opacity: 0 }
+              }
+              transition={{
+                duration: 3.0,
+                delay: 2.1,
+                ease: [0.42, 0, 0.24, 1],
+                repeat: Infinity,
+                repeatDelay: 3.2,
+              }}
+            />
+
+            {/* Gentle center ornament glint synced as the shimmer crosses center */}
+            {shape.ornament && (
+              <motion.path
+                d={shape.ornament}
+                stroke="#9eb2ff"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                style={{ transformOrigin: '480px 17.5px' }}
+                initial={{ opacity: 0, scale: 0.94 }}
+                animate={
+                  shouldAnimateShimmer
+                    ? {
+                        opacity: [0, 0, 0.85, 0, 0],
+                        scale: [0.96, 0.98, 1.07, 1, 0.96],
+                      }
+                    : { opacity: 0, scale: 0.94 }
+                }
+                transition={{
+                  duration: 2.6,
+                  delay: 0.85,
+                  times: [0, 0.36, 0.5, 0.66, 1],
+                  ease: 'easeInOut',
+                  repeat: Infinity,
+                  repeatDelay: 3.6,
+                }}
+              />
+            )}
+          </>
+        )}
       </svg>
     </div>
   );
 }
+
