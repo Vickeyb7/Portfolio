@@ -28,7 +28,7 @@ import { HelloSection } from './components/HelloSection';
 import { ScrollProgressBar } from './components/ui/scroll-progress-bar';
 import { SectionProgressIndicator } from './components/ui/section-progress-indicator';
 import { MagneticCursor } from './components/ui/magnetic-cursor';
-import { HandDrawnDivider } from './components/ui/hand-drawn-divider';
+import { SectionDivider } from './components/ui/section-divider';
 import { ScrollTargetAnchor } from './components/ui/scroll-target-anchor';
 import { ScrollSpyDebugLine } from './components/ui/scroll-spy-debug-line';
 import { SectionHighlighter } from './components/ui/section-highlighter';
@@ -981,6 +981,8 @@ export default function App() {
                 </SectionReveal>
               </div>
 
+              <SectionDivider variant="quill" tone="ink" />
+
               <SectionReveal delay={0.04}>
                 <SectionErrorBoundary label="product showcase">
                   <Suspense fallback={<SectionSkeleton label="product showcase" />}>
@@ -991,7 +993,7 @@ export default function App() {
             </div>
           </SectionHighlighter>
 
-          <HandDrawnDivider variant="loop" />
+          <SectionDivider variant="flourish" tone="champagne" />
 
           <SectionHighlighter
             sectionId="case-studies"
@@ -1017,7 +1019,7 @@ export default function App() {
             </SectionReveal>
           </SectionHighlighter>
 
-          <HandDrawnDivider variant="wave" />
+          <SectionDivider variant="double-rule" tone="cobalt" />
 
           <SectionHighlighter
             sectionId="experience"
@@ -1043,7 +1045,7 @@ export default function App() {
             </SectionReveal>
           </SectionHighlighter>
 
-          <HandDrawnDivider variant="diamond" />
+          <SectionDivider variant="quill" tone="ink" />
 
           <SectionHighlighter
             sectionId="capabilities"
@@ -1071,7 +1073,7 @@ export default function App() {
             </SectionReveal>
           </SectionHighlighter>
 
-          <HandDrawnDivider variant="loop" />
+          <SectionDivider variant="flourish" tone="cobalt" />
 
           <SectionReveal delay={0.04}>
             <SectionErrorBoundary label="fun facts">
@@ -1080,6 +1082,8 @@ export default function App() {
               </Suspense>
             </SectionErrorBoundary>
           </SectionReveal>
+
+          <SectionDivider variant="double-rule" tone="champagne" />
 
           <SectionHighlighter
             sectionId="contact"

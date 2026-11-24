@@ -5,6 +5,7 @@ import {
   useState,
 } from 'react';
 import {
+  AnimatePresence,
   motion,
   useMotionValue,
   useReducedMotion,
@@ -31,6 +32,169 @@ const SECTION_NUMBERS: Record<SectionId, string> = {
 
 const MAGNETIC_PULL_STRENGTH = 0.4;
 const MAGNETIC_MAX_OFFSET = 7;
+const TOOLTIP_EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
+
+interface PenInkTooltipProps {
+  id: string;
+  sectionNumber: string;
+  label: string;
+  isActive: boolean;
+  isOnNightSheet: boolean;
+  prefersReducedMotion: boolean;
+}
+
+/**
+ * Editorial pen-ink marginalia tooltip revealed on hover or focus of a
+ * SectionProgressIndicator dot. Pairs the portfolio's handwritten Caveat
+ * pen-ink aesthetic with a live self-drawing fountain-pen underline swoosh
+ * and curved ink arrow pointing directly to the active rail dot.
+ */
+function PenInkTooltip({
+  id,
+  sectionNumber,
+  label,
+  isActive,
+  isOnNightSheet,
+  prefersReducedMotion,
+}: PenInkTooltipProps) {
+  const inkStrokeColor = isOnNightSheet ? '#8aa2ff' : '#4f6df5';
+
+  return (
+    <motion.div
+      id={id}
+      role="tooltip"
+      initial={
+        prefersReducedMotion
+          ? { opacity: 0 }
+          : { opacity: 0, x: 9, rotate: -1.8, scale: 0.96 }
+      }
+      animate={
+        prefersReducedMotion
+          ? { opacity: 1 }
+          : { opacity: 1, x: 0, rotate: -0.6, scale: 1 }
+      }
+      exit={
+        prefersReducedMotion
+          ? { opacity: 0 }
+          : { opacity: 0, x: 6, rotate: -1.2, scale: 0.97 }
+      }
+      transition={{
+        duration: prefersReducedMotion ? 0.01 : 0.19,
+        ease: TOOLTIP_EASE,
+      }}
+      className="pointer-events-none absolute right-9 z-20 flex items-center gap-1 select-none"
+    >
+      {/* Archival paper / charcoal night marginalia slip */}
+      <div
+        className={`relative rounded-[3px] px-3 pt-1.5 pb-2 backdrop-blur-md transition-colors duration-300 ${
+          isOnNightSheet
+            ? 'border border-[#8aa2ff]/25 bg-[#141720]/95 shadow-[0_12px_28px_-14px_rgba(0,0,0,0.8)]'
+            : 'border border-[#4f6df5]/22 bg-[#f6f1e7]/96 shadow-[0_12px_26px_-14px_rgba(24,20,14,0.28)]'
+        }`}
+      >
+        <div className="flex items-baseline gap-1.5 whitespace-nowrap">
+          <span
+            className={`font-mono text-[10px] font-semibold tracking-[0.06em] tabular-nums ${
+              isOnNightSheet ? 'text-[#a4adc4]' : 'text-[#665d50]'
+            }`}
+          >
+            {sectionNumber}
+          </span>
+          <span
+            aria-hidden="true"
+            className={isOnNightSheet ? 'text-white/25' : 'text-[#2a2319]/25'}
+          >
+            ·
+          </span>
+          <span
+            className={`font-hand text-[1.24rem] leading-none font-bold tracking-[0.015em] ${
+              isOnNightSheet ? 'text-[#9db3ff]' : 'text-[#2e4de0]'
+            }`}
+          >
+            {label}
+          </span>
+        </div>
+
+        {/* Self-drawing hand-penned fountain-ink swoosh underline */}
+        <svg
+          viewBox="0 0 120 12"
+          preserveAspectRatio="none"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          aria-hidden="true"
+          className="mt-0.5 block h-[7px] w-full overflow-visible"
+        >
+          <motion.path
+            d="M 2 7.5 C 32 3.2, 78 2.8, 118 6.4"
+            stroke={inkStrokeColor}
+            strokeWidth="2.1"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            initial={{ pathLength: prefersReducedMotion ? 1 : 0, opacity: prefersReducedMotion ? 0.92 : 0.35 }}
+            animate={{ pathLength: 1, opacity: 0.94 }}
+            transition={{
+              duration: prefersReducedMotion ? 0.01 : 0.28,
+              delay: prefersReducedMotion ? 0 : 0.04,
+              ease: TOOLTIP_EASE,
+            }}
+          />
+          {isActive && (
+            <motion.path
+              d="M 16 10.2 C 48 8.2, 84 8.0, 108 9.6"
+              stroke={inkStrokeColor}
+              strokeWidth="1.2"
+              strokeLinecap="round"
+              initial={{ pathLength: prefersReducedMotion ? 1 : 0, opacity: prefersReducedMotion ? 0.65 : 0 }}
+              animate={{ pathLength: 1, opacity: 0.65 }}
+              transition={{
+                duration: prefersReducedMotion ? 0.01 : 0.22,
+                delay: prefersReducedMotion ? 0 : 0.14,
+                ease: TOOLTIP_EASE,
+              }}
+            />
+          )}
+        </svg>
+      </div>
+
+      {/* Hand-drawn curved fountain-pen arrow pointing directly to the hovered dot */}
+      <svg
+        viewBox="0 0 22 14"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        aria-hidden="true"
+        className="h-3.5 w-5 shrink-0 overflow-visible"
+      >
+        <motion.path
+          d="M 1 8.5 C 7 5.2, 13 5.2, 19.5 7.2"
+          stroke={inkStrokeColor}
+          strokeWidth="1.65"
+          strokeLinecap="round"
+          initial={{ pathLength: prefersReducedMotion ? 1 : 0 }}
+          animate={{ pathLength: 1 }}
+          transition={{
+            duration: prefersReducedMotion ? 0.01 : 0.22,
+            delay: prefersReducedMotion ? 0 : 0.06,
+            ease: TOOLTIP_EASE,
+          }}
+        />
+        <motion.path
+          d="M 14.5 3.6 L 20.2 7.2 L 14.8 10.6"
+          stroke={inkStrokeColor}
+          strokeWidth="1.65"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          initial={{ pathLength: prefersReducedMotion ? 1 : 0, opacity: prefersReducedMotion ? 1 : 0 }}
+          animate={{ pathLength: 1, opacity: 1 }}
+          transition={{
+            duration: prefersReducedMotion ? 0.01 : 0.16,
+            delay: prefersReducedMotion ? 0 : 0.16,
+            ease: TOOLTIP_EASE,
+          }}
+        />
+      </svg>
+    </motion.div>
+  );
+}
 
 interface MagneticProgressDotProps {
   section: { readonly id: SectionId; readonly label: string };
@@ -82,33 +246,23 @@ function MagneticProgressDot({
 
   const showLabel = isHovered || isFocused;
   const isEngaged = isHovered || isFocused;
+  const tooltipId = `section-progress-tooltip-${section.id}`;
 
   return (
     <li className="relative flex items-center justify-center">
-      {/* Unboxed archival serif tooltip slip revealed on hover or keyboard focus */}
-      <span
-        aria-hidden="true"
-        className={`pointer-events-none absolute right-9 flex items-baseline gap-1.5 whitespace-nowrap border-t border-b px-2.5 py-1 backdrop-blur-md transition-[opacity,transform] duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-          isOnNightSheet
-            ? 'border-white/16 bg-[#141824]/92 text-[#eef1fa] shadow-[0_8px_22px_-12px_rgba(0,0,0,0.7)]'
-            : 'border-[#2a2319]/15 bg-[#f6f1e7]/94 text-[#1c1a16] shadow-[0_8px_22px_-12px_rgba(24,20,14,0.26)]'
-        } ${
-          showLabel
-            ? 'translate-x-0 opacity-100'
-            : 'translate-x-1.5 opacity-0'
-        }`}
-      >
-        <span
-          className={`font-mono text-[10px] font-semibold tracking-[0.06em] ${
-            isOnNightSheet ? 'text-[#8aa2ff]' : 'text-[#4f6df5]'
-          }`}
-        >
-          {SECTION_NUMBERS[section.id]}
-        </span>
-        <span className="font-serif italic text-[13.5px] font-semibold leading-none tracking-[0.015em]">
-          {section.label}
-        </span>
-      </span>
+      {/* Custom pen-ink marginalia tooltip revealed on hover or keyboard focus */}
+      <AnimatePresence>
+        {showLabel && (
+          <PenInkTooltip
+            id={tooltipId}
+            sectionNumber={SECTION_NUMBERS[section.id]}
+            label={section.label}
+            isActive={isActive}
+            isOnNightSheet={isOnNightSheet}
+            prefersReducedMotion={prefersReducedMotion}
+          />
+        )}
+      </AnimatePresence>
 
       {/* One-click magnetic jump-to-section dot button */}
       <button
@@ -127,6 +281,7 @@ function MagneticProgressDot({
           resetMagnetic();
         }}
         aria-label={`Jump to ${section.label} section`}
+        aria-describedby={showLabel ? tooltipId : undefined}
         aria-current={isActive ? 'location' : undefined}
         className={`group relative flex h-8 w-8 items-center justify-center rounded-full cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${
           isOnNightSheet
