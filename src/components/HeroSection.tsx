@@ -122,7 +122,7 @@ export function HeroSection({ onOpenResume, onJumpToCaseStudies }: HeroSectionPr
                     alt={`${PROFILE.name}, ${PROFILE.role}`}
                     fallbackTitle={PROFILE.name}
                     className="h-full w-full"
-                    imgClassName="object-top hover:scale-[1.02]"
+                    imgClassName="object-cover object-[50%_26%] hover:scale-[1.02]"
                   />
                   {/* Measured bottom scrim over studio photo for >= 7:1 text legibility */}
                   <div

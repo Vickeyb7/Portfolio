@@ -3,6 +3,7 @@ import {
   ComponentType,
   ErrorInfo,
   lazy,
+  MouseEvent as ReactMouseEvent,
   ReactNode,
   Suspense,
   useCallback,
@@ -335,6 +336,7 @@ export default function App() {
   const [resumeOpen, setResumeOpen] = useState(false);
   const [prefilledTopic, setPrefilledTopic] = useState<string | null>(null);
   const [isThankYouVisible, setIsThankYouVisible] = useState(false);
+  const [keyboardAnnouncement, setKeyboardAnnouncement] = useState('');
   const [scrollMetrics, setScrollMetrics] = useState<ScrollSpyMetrics>(() =>
     computeScrollSpyMetrics()
   );
@@ -613,6 +615,92 @@ export default function App() {
     };
   }, [resolveSectionElement]);
 
+  // Global keyboard shortcuts: 'n' next section, 'p' previous section, 'Esc' closes active modals/drawers
+  useEffect(() => {
+    const isEditableElement = (target: EventTarget | null): boolean => {
+      if (!(target instanceof HTMLElement)) return false;
+      const tag = target.tagName;
+      return (
+        tag === 'INPUT' ||
+        tag === 'TEXTAREA' ||
+        tag === 'SELECT' ||
+        target.isContentEditable
+      );
+    };
+
+    const handleGlobalKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        if (activeCaseStudy || resumeOpen) {
+          event.preventDefault();
+          setActiveCaseStudy(null);
+          setResumeOpen(false);
+          setKeyboardAnnouncement('Closed active dialog');
+        }
+        return;
+      }
+
+      if (
+        event.metaKey ||
+        event.ctrlKey ||
+        event.altKey ||
+        event.repeat ||
+        isEditableElement(event.target)
+      ) {
+        return;
+      }
+
+      // Skip section shortcuts while any modal or drawer dialog is open
+      const hasOpenDialog =
+        activeCaseStudy !== null ||
+        resumeOpen ||
+        document.querySelector('[role="dialog"][aria-modal="true"]') !== null;
+      if (hasOpenDialog) return;
+
+      const key = event.key.toLowerCase();
+      if (key !== 'n' && key !== 'p') return;
+
+      const currentIdx = NAV_SECTIONS.findIndex(
+        (section) => section.id === activeSection
+      );
+      const safeIdx = currentIdx >= 0 ? currentIdx : 0;
+      const targetIdx =
+        key === 'n'
+          ? Math.min(NAV_SECTIONS.length - 1, safeIdx + 1)
+          : Math.max(0, safeIdx - 1);
+
+      if (targetIdx === safeIdx) return;
+
+      event.preventDefault();
+      const targetSection = NAV_SECTIONS[targetIdx];
+      scrollToSection(targetSection.id);
+      setKeyboardAnnouncement(`Navigated to ${targetSection.label} section`);
+    };
+
+    window.addEventListener('keydown', handleGlobalKeyDown);
+    return () => window.removeEventListener('keydown', handleGlobalKeyDown);
+  }, [activeSection, activeCaseStudy, resumeOpen, scrollToSection]);
+
+  const handleSkipToContent = useCallback(
+    (event: ReactMouseEvent<HTMLAnchorElement>) => {
+      event.preventDefault();
+      const mainEl = mainRef.current;
+      if (!mainEl) return;
+
+      mainEl.focus({ preventScroll: true });
+      const rect = mainEl.getBoundingClientRect();
+      if (Number.isFinite(rect.top)) {
+        const headerOffset = getStickyHeaderHeight() + SCROLL_PADDING_BUFFER;
+        const targetTop = Math.max(
+          0,
+          Math.round(rect.top + window.scrollY - headerOffset)
+        );
+        window.scrollTo({ top: targetTop, behavior: 'smooth' });
+      }
+      setKeyboardAnnouncement('Skipped to main content');
+    },
+    []
+  );
+
   const handleNextCaseStudy = (currentId: string) => {
     const currentIndex = CASE_STUDIES.findIndex((s) => s.id === currentId);
     const nextIndex = (currentIndex + 1) % CASE_STUDIES.length;
@@ -630,6 +718,24 @@ export default function App() {
   return (
     <MotionConfig reducedMotion="user">
       <div className="min-h-screen bg-[#ebe6dc] text-[#16181f] dark:bg-[#080a0f] dark:text-[#e4e6f0] transition-colors duration-200">
+        {/* Top-of-DOM accessibility link for keyboard-only and screen-reader users */}
+        <a
+          href="#main-content"
+          onClick={handleSkipToContent}
+          className="no-print sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[100] focus:inline-flex focus:items-center focus:rounded-lg focus:border focus:border-[#4f6df5]/40 focus:bg-[#fdfbf6] focus:px-4 focus:py-2.5 focus:font-display focus:text-sm focus:font-semibold focus:text-[#16181f] focus:shadow-lg focus:outline-none focus:ring-2 focus:ring-[#1d63ff] focus:ring-offset-2"
+        >
+          Skip to content
+        </a>
+
+        {/* Screen-reader live region for global keyboard navigation feedback */}
+        <div
+          role="status"
+          aria-live="polite"
+          aria-atomic="true"
+          className="sr-only"
+        >
+          {keyboardAnnouncement}
+        </div>
         <SectionSeoHead
           activeSection={activeSection}
           activeCaseStudy={activeCaseStudy}
@@ -654,7 +760,12 @@ export default function App() {
           onOpenResume={() => setResumeOpen(true)}
         />
 
-        <main ref={mainRef} className="no-print">
+        <main
+          id="main-content"
+          ref={mainRef}
+          tabIndex={-1}
+          className="no-print focus:outline-none"
+        >
           {/* Top overview container + transparent ScrollTargetAnchor markers for remaining sections */}
           <SectionHighlighter
             sectionId="overview"

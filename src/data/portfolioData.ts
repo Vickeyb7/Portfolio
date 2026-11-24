@@ -144,7 +144,7 @@ export const PROFILE = {
   email: 'snb2990@gmail.com',
   linkedin: 'https://linkedin.com/in/shankarnarayanbhattacharjee',
   github: 'https://github.com/snb2990',
-  portraitUrl: '/src/assets/images/hero_pm_portrait_1795437982236.jpg',
+  portraitUrl: '/assets/aistudio/Zoom_photo_2166b094.jpeg',
   headline: 'Turning Enterprise Friction Into Shipped Product Velocity.',
   subheadline:
     'Emerging SaaS Product Manager combining 4+ years of developer-first enterprise sales rigor at BrowserStack with Top 1% product execution from the NextLeap PM Fellowship. I translate complex buyer bottlenecks into measurable activation, retention, and expansion outcomes.',
