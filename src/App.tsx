@@ -12,7 +12,14 @@ import {
   useRef,
   useState,
 } from 'react';
-import { motion, MotionConfig, useInView, useReducedMotion } from 'motion/react';
+import {
+  motion,
+  MotionConfig,
+  useInView,
+  useMotionValueEvent,
+  useReducedMotion,
+  useScroll,
+} from 'motion/react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Navbar } from './components/Navbar';
@@ -364,12 +371,15 @@ export default function App() {
   const [resumeOpen, setResumeOpen] = useState(false);
   const [prefilledTopic, setPrefilledTopic] = useState<string | null>(null);
   const [isThankYouVisible, setIsThankYouVisible] = useState(false);
+  const [isNavbarHidden, setIsNavbarHidden] = useState(false);
   const [keyboardAnnouncement, setKeyboardAnnouncement] = useState('');
   const [scrollMetrics, setScrollMetrics] = useState<ScrollSpyMetrics>(() =>
     computeScrollSpyMetrics()
   );
 
   const stickyHeaderOffset = scrollMetrics.headerHeight + SCROLL_PADDING_BUFFER;
+  const { scrollY } = useScroll();
+  const lastScrollYRef = useRef<number>(0);
 
   // Untransformed outer anchor refs for exact scroll-to and scroll-spy geometry
   const mainRef = useRef<HTMLElement>(null);
@@ -492,6 +502,32 @@ export default function App() {
       // ignore storage errors in restricted iframes
     }
   }, []);
+
+  // Hide navbar when scrolling down past top threshold; reappear immediately on scroll up
+  useMotionValueEvent(scrollY, 'change', (latest) => {
+    const previous = lastScrollYRef.current;
+    lastScrollYRef.current = latest;
+
+    // Keep navbar visible near the very top, while modals are open, or during programmatic nav scrolls
+    if (
+      latest <= 88 ||
+      activeCaseStudy !== null ||
+      resumeOpen ||
+      activeScrollTweenRef.current !== null
+    ) {
+      setIsNavbarHidden((prev) => (prev ? false : prev));
+      return;
+    }
+
+    const delta = latest - previous;
+    if (delta < -2) {
+      // Scrolling up: reappear immediately
+      setIsNavbarHidden((prev) => (prev ? false : prev));
+    } else if (delta > 6) {
+      // Scrolling down past threshold: slide navbar out of view
+      setIsNavbarHidden((prev) => (prev ? prev : true));
+    }
+  });
 
   const cancelActiveScrollTween = useCallback(() => {
     if (activeScrollTweenRef.current) {
@@ -905,6 +941,7 @@ export default function App() {
         <Navbar
           activeSection={activeSection}
           showResumeButton={isThankYouVisible}
+          isHidden={isNavbarHidden}
           onNavigate={scrollToSection}
           onOpenResume={() => setResumeOpen(true)}
         />

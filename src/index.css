@@ -434,6 +434,12 @@ html.dark .editorial-scroll::-webkit-scrollbar-thumb:hover {
     stroke: #1e293b !important;
   }
 
+  /* Ensure dynamic PenAnnotation bio strokes print cleanly in completed state */
+  [data-pen-annotation-overlay="true"] path {
+    stroke-dasharray: none !important;
+    stroke-dashoffset: 0 !important;
+  }
+
   /* Clean document pagination & break discipline */
   h1,
   h2,

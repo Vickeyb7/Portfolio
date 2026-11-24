@@ -21,6 +21,11 @@ import { ResilientImage } from './ResilientImage';
 import { EditorialSheet } from './ui/editorial-sheet';
 import { EditorialStaggerGroup, EditorialStaggerItem } from './ui/editorial-stagger';
 import { ZigZagToSwooshUnderline } from './ui/pen-annotations';
+import {
+  PenAnnotation,
+  PenAnnotationKind,
+  PenAnnotationMark,
+} from './ui/pen-annotation-overlay';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -118,24 +123,24 @@ const PM_TRAITS: TraitCallout[] = [
 ];
 
 const MARKED_UP_BIO_PARAGRAPHS = [
-  "I'm an emerging SaaS Product Manager combining [4+ years] of developer-first enterprise sales rigor at BrowserStack with *structured product discovery*—translating complex buyer bottlenecks into requirements engineers genuinely enjoy building.",
-  'Graduating in the [Top 1%] of the NextLeap PM Fellowship sharpened how I bridge *commercial intuition* with BigQuery cohort SQL, sharp non-goals, and ruthless v1 scoping.',
-  'Whether pruning a noisy roadmap or shipping [zero-to-one] workflows, I obsess over *measurable activation, retention, and expansion*—and products customers would genuinely miss if they disappeared.',
+  "I'm an emerging SaaS Product Manager combining [4+ years] of developer-first enterprise sales rigor at BrowserStack with *structured product discovery*—translating complex buyer bottlenecks into ~requirements engineers genuinely enjoy building~.",
+  'Graduating in the [Top 1%] of the NextLeap PM Fellowship sharpened how I bridge *commercial intuition* with ~BigQuery cohort SQL~, sharp non-goals, and ruthless v1 scoping.',
+  'Whether pruning a noisy roadmap or shipping [zero-to-one] workflows, I obsess over *measurable activation, retention, and expansion*—and products ~customers would genuinely miss~ if they disappeared.',
 ];
 
 type BioToken =
   | { type: 'text'; value: string }
-  | { type: 'underline'; value: string }
-  | { type: 'oval'; value: string };
+  | { type: PenAnnotationKind; value: string };
 
 /**
- * Parses inline editorial markup:
+ * Parses inline editorial markup for the `PenAnnotation` overlay:
  *  - `*phrase*` -> animated hand-drawn pen underline
  *  - `[phrase]` -> animated hand-drawn pen oval
+ *  - `~phrase~` -> animated hand-drawn highlighter sweep
  */
 function parseBioMarkup(input: string): BioToken[] {
   const tokens: BioToken[] = [];
-  const pattern = /(\*[^*]+\*|\[[^\]]+\])/g;
+  const pattern = /(\*[^*]+\*|\[[^\]]+\]|~[^~]+~)/g;
   let lastIndex = 0;
   let match: RegExpExecArray | null;
 
@@ -148,6 +153,8 @@ function parseBioMarkup(input: string): BioToken[] {
       tokens.push({ type: 'underline', value: raw.slice(1, -1) });
     } else if (raw.startsWith('[') && raw.endsWith(']')) {
       tokens.push({ type: 'oval', value: raw.slice(1, -1) });
+    } else if (raw.startsWith('~') && raw.endsWith('~')) {
+      tokens.push({ type: 'highlight', value: raw.slice(1, -1) });
     }
     lastIndex = pattern.lastIndex;
   }
@@ -157,82 +164,6 @@ function parseBioMarkup(input: string): BioToken[] {
   }
 
   return tokens;
-}
-
-function PenUnderlinePhrase({ children }: { children: string }) {
-  return (
-    <span
-      data-hello-bio-mark="underline"
-      className="relative inline-block font-medium text-[#141720]"
-    >
-      <span className="relative z-[1]">{children}</span>
-      <svg
-        viewBox="0 0 180 16"
-        preserveAspectRatio="none"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-        aria-hidden="true"
-        className="pointer-events-none absolute -bottom-1.5 left-0 h-[10px] w-full overflow-visible pen-ink-text"
-      >
-        <path
-          data-hello-bio-stroke="true"
-          data-hello-bio-stroke-role="primary"
-          d="M 2 10.5 C 44 4.8, 118 4.4, 178 8.6"
-          stroke="currentColor"
-          strokeWidth="2.35"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-        <path
-          data-hello-bio-stroke="true"
-          data-hello-bio-stroke-role="secondary"
-          d="M 18 13.6 C 68 10.8, 128 10.2, 166 12.6"
-          stroke="currentColor"
-          strokeWidth="1.2"
-          strokeLinecap="round"
-          opacity="0.7"
-        />
-      </svg>
-    </span>
-  );
-}
-
-function PenOvalPhrase({ children }: { children: string }) {
-  return (
-    <span
-      data-hello-bio-mark="oval"
-      className="relative mx-0.5 inline-block whitespace-nowrap px-2 py-0.5 font-semibold text-[#141720]"
-    >
-      <span className="relative z-[1]">{children}</span>
-      <svg
-        viewBox="0 0 144 50"
-        preserveAspectRatio="none"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-        aria-hidden="true"
-        className="pointer-events-none absolute -inset-x-1.5 -inset-y-1 h-[calc(100%+8px)] w-[calc(100%+12px)] overflow-visible pen-ink-text"
-      >
-        <path
-          data-hello-bio-stroke="true"
-          data-hello-bio-stroke-role="primary"
-          d="M 24 8 C 62 1.8, 116 3.8, 135 16.5 C 145 25, 136 40.5, 109 45 C 72 49.5, 22 46.5, 9 33.5 C -1 23, 9 10, 36 6.2"
-          stroke="currentColor"
-          strokeWidth="2.1"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-        <path
-          data-hello-bio-stroke="true"
-          data-hello-bio-stroke-role="secondary"
-          d="M 32 7.4 C 66 4.2, 106 5.4, 127 14.2"
-          stroke="currentColor"
-          strokeWidth="1.1"
-          strokeLinecap="round"
-          opacity="0.58"
-        />
-      </svg>
-    </span>
-  );
 }
 
 function ParallaxTraitItem({
@@ -303,7 +234,6 @@ export function HelloSection({
   const prefersReducedMotion = Boolean(useReducedMotion());
   const stageRef = useRef<HTMLDivElement>(null);
   const portraitBoxRef = useRef<HTMLDivElement>(null);
-  const bioRef = useRef<HTMLDivElement>(null);
   const [colorPinned, setColorPinned] = useState(false);
 
   // Normalized pointer coordinates (-1..1) for smooth GPU parallax across the 6 PM traits
@@ -330,12 +260,11 @@ export function HelloSection({
     rawY.set(0);
   };
 
-  // GSAP ScrollTrigger stroke-draw for dual sketchy boxes, 6 trait arrows,
-  // and scroll-linked pen underlines (*phrase*) & ovals ([phrase]) across the PM bio
+  // GSAP ScrollTrigger stroke-draw for the dual sketchy portrait boxes and 6 trait arrows
+  // (Biography highlights, underlines, and ovals are driven by the `PenAnnotation` overlay)
   useLayoutEffect(() => {
     const stageEl = stageRef.current;
-    const bioEl = bioRef.current;
-    if (!stageEl || !bioEl) return;
+    if (!stageEl) return;
 
     const mm = gsap.matchMedia();
 
@@ -352,14 +281,8 @@ export function HelloSection({
         const arrowPaths = Array.from(
           stageEl.querySelectorAll<SVGPathElement>('[data-hello-arrow-stroke="true"]')
         );
-        const bioParagraphs = Array.from(
-          bioEl.querySelectorAll<HTMLParagraphElement>('[data-hello-bio-paragraph="true"]')
-        );
-        const bioPaths = Array.from(
-          bioEl.querySelectorAll<SVGPathElement>('[data-hello-bio-stroke="true"]')
-        );
 
-        const allPaths = [...boxPaths, ...arrowPaths, ...bioPaths];
+        const allPaths = [...boxPaths, ...arrowPaths];
 
         if (reduce) {
           allPaths.forEach((p) => {
@@ -369,19 +292,14 @@ export function HelloSection({
           return;
         }
 
-        const prepPaths = (paths: SVGPathElement[]) => {
-          paths.forEach((p) => {
-            const len = p.getTotalLength();
-            gsap.set(p, {
-              strokeDasharray: len + 4,
-              strokeDashoffset: len + 4,
-            });
+        allPaths.forEach((p) => {
+          const len = p.getTotalLength();
+          gsap.set(p, {
+            strokeDasharray: len + 4,
+            strokeDashoffset: len + 4,
           });
-        };
+        });
 
-        prepPaths(allPaths);
-
-        // 1. Dual sketchy pen boxes + 6 hand-drawn trait arrows
         const stageTl = gsap.timeline({
           scrollTrigger: {
             trigger: stageEl,
@@ -412,60 +330,6 @@ export function HelloSection({
             '-=0.45'
           );
         }
-
-        // 2. Scroll-linked pen-line underlines (*phrase*) & ovals ([phrase])
-        // Each paragraph sketches its editorial annotations smoothly as the reader scrolls past it
-        bioParagraphs.forEach((paragraphEl) => {
-          const marks = Array.from(
-            paragraphEl.querySelectorAll<HTMLElement>('[data-hello-bio-mark]')
-          );
-          if (marks.length === 0) return;
-
-          const paragraphTl = gsap.timeline({
-            scrollTrigger: {
-              trigger: paragraphEl,
-              start: 'top 86%',
-              end: 'bottom 46%',
-              scrub: 0.45,
-              invalidateOnRefresh: true,
-            },
-          });
-
-          marks.forEach((markEl, markIdx) => {
-            const primaryStroke = markEl.querySelector<SVGPathElement>(
-              '[data-hello-bio-stroke-role="primary"]'
-            );
-            const secondaryStroke = markEl.querySelector<SVGPathElement>(
-              '[data-hello-bio-stroke-role="secondary"]'
-            );
-            const isOval = markEl.dataset.helloBioMark === 'oval';
-            const slotStart = markIdx * 0.52;
-
-            if (primaryStroke) {
-              paragraphTl.to(
-                primaryStroke,
-                {
-                  strokeDashoffset: 0,
-                  duration: isOval ? 0.62 : 0.48,
-                  ease: 'power2.inOut',
-                },
-                slotStart
-              );
-            }
-
-            if (secondaryStroke) {
-              paragraphTl.to(
-                secondaryStroke,
-                {
-                  strokeDashoffset: 0,
-                  duration: 0.34,
-                  ease: 'power2.out',
-                },
-                slotStart + (isOval ? 0.36 : 0.24)
-              );
-            }
-          });
-        });
       }
     );
 
@@ -635,29 +499,22 @@ export function HelloSection({
             </div>
           </div>
 
-          {/* Marked-Up PM Bio with Scroll-Linked Pen Underlines (*phrase*) & Ovals ([phrase]) */}
-          <div
-            ref={bioRef}
-            className="mx-auto mt-12 md:mt-16 max-w-[68ch] border-t border-[#2a2319]/12 pt-9 md:pt-11"
-          >
-            <div className="space-y-6 text-[1.05rem] sm:text-[1.15rem] leading-[1.9] tracking-[0.012em] text-[#2b2721]">
+          {/* Marked-Up PM Bio with Dynamic PenAnnotation Overlay (Ovals, Underlines & Highlighter Sweeps) */}
+          <div className="mx-auto mt-12 md:mt-16 max-w-[68ch] border-t border-[#2a2319]/12 pt-9 md:pt-11">
+            <PenAnnotation
+              triggerStart="top 80%"
+              className="space-y-6 text-[1.05rem] sm:text-[1.15rem] leading-[1.9] tracking-[0.012em] text-[#2b2721]"
+            >
               {MARKED_UP_BIO_PARAGRAPHS.map((paragraph, pIndex) => {
                 const tokens = parseBioMarkup(paragraph);
                 return (
-                  <p key={pIndex} data-hello-bio-paragraph="true">
+                  <p key={pIndex}>
                     {tokens.map((token, tIndex) => {
-                      if (token.type === 'underline') {
+                      if (token.type !== 'text') {
                         return (
-                          <PenUnderlinePhrase key={tIndex}>
+                          <PenAnnotationMark key={tIndex} kind={token.type}>
                             {token.value}
-                          </PenUnderlinePhrase>
-                        );
-                      }
-                      if (token.type === 'oval') {
-                        return (
-                          <PenOvalPhrase key={tIndex}>
-                            {token.value}
-                          </PenOvalPhrase>
+                          </PenAnnotationMark>
                         );
                       }
                       return <Fragment key={tIndex}>{token.value}</Fragment>;
@@ -665,7 +522,7 @@ export function HelloSection({
                   </p>
                 );
               })}
-            </div>
+            </PenAnnotation>
 
             {/* Executive Focus, Lineage Meta & Action Pair (merged from Executive Overview) */}
             <div className="mt-10 border-t border-[#2a2319]/12 pt-7">

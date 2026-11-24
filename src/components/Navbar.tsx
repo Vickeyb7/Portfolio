@@ -20,6 +20,7 @@ import ArrowFillButton from './ui/arrow-fill-button';
 interface NavbarProps {
   activeSection: SectionId;
   showResumeButton: boolean;
+  isHidden?: boolean;
   onNavigate: (id: SectionId) => void;
   onOpenResume: () => void;
 }
@@ -37,6 +38,7 @@ const SECTION_ICONS: Record<SectionId, ReactNode> = {
 export function Navbar({
   activeSection,
   showResumeButton,
+  isHidden = false,
   onNavigate,
   onOpenResume,
 }: NavbarProps) {
@@ -44,12 +46,16 @@ export function Navbar({
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [sectionDropdownOpen, setSectionDropdownOpen] = useState(false);
+  const [hasFocusWithin, setHasFocusWithin] = useState(false);
   const [isCompact, setIsCompact] = useState<boolean>(() =>
     typeof window !== 'undefined'
       ? window.matchMedia(COMPACT_MEDIA_QUERY).matches
       : false
   );
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  const effectivelyHidden =
+    isHidden && !mobileMenuOpen && !sectionDropdownOpen && !hasFocusWithin;
 
   const activeIndex = useMemo(() => {
     const idx = NAV_SECTIONS.findIndex((item) => item.id === activeSection);
@@ -242,10 +248,36 @@ export function Navbar({
 
   return (
     <>
-      <header
+      <motion.header
         data-sticky-header="true"
         data-compact={isCompact ? 'true' : 'false'}
-        className={`no-print sticky top-0 z-40 w-full transition-colors duration-200 ${
+        data-nav-hidden={effectivelyHidden ? 'true' : 'false'}
+        initial={false}
+        animate={{
+          y: effectivelyHidden ? '-100%' : '0%',
+          opacity: effectivelyHidden ? 0 : 1,
+        }}
+        transition={
+          prefersReducedMotion
+            ? { duration: 0.01 }
+            : effectivelyHidden
+            ? { duration: 0.24, ease: [0.4, 0, 1, 1] }
+            : { duration: 0.16, ease: [0.16, 1, 0.3, 1] }
+        }
+        onFocusCapture={() => setHasFocusWithin(true)}
+        onBlurCapture={(event) => {
+          if (
+            !event.currentTarget.contains(
+              event.relatedTarget as Node | null
+            )
+          ) {
+            setHasFocusWithin(false);
+          }
+        }}
+        style={{
+          pointerEvents: effectivelyHidden ? 'none' : 'auto',
+        }}
+        className={`no-print sticky top-0 z-40 w-full will-change-transform transition-colors duration-200 ${
           scrolled
             ? 'bg-white/88 dark:bg-[#0a0d14]/88 backdrop-blur-md border-b border-slate-200/90 dark:border-white/[0.08]'
             : 'bg-transparent border-b border-transparent'
@@ -441,7 +473,7 @@ export function Navbar({
             )}
           </div>
         </div>
-      </header>
+      </motion.header>
 
       {/* Slide-over Mobile Navigation Drawer */}
       <AnimatePresence>
